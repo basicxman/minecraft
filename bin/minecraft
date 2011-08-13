@@ -1,6 +1,43 @@
 #!/usr/bin/env ruby
 
+require "slop"
+require "net/http"
 require "minecraft"
 
-server = Minecraft::Server.new("java -Xmx1024M -Xms512M -jar minecraft_server.jar nogui")
-server.sin.puts("save-on")
+def minecraft_exit
+  if $opts.tempmobs?
+    puts "[+] Restoring previous mob state."
+    Minecraft::Tools.toggle_mobs
+  end
+  exit!
+end
+
+trap("SIGINT") { minecraft_exit }
+
+$opts = Slop.parse :help => true do
+  banner "Usage: minecraft [options]"
+
+  on :n, :no_run,     "Don't run the Minecraft server instance."
+  on :u, :update,     "Download the latest version of the Minecraft server jarfile."
+  on :s, :min_memory, "Specify the minimum amount of memory to allocate.", :optional => true
+  on :x, :max_memory, "Specify the maximum amount of memory to allocate.", :optional => true
+  on :no_auto_save,   "Disable auto save."
+  on :m, :tempmobs,   "Temporarily toggles mobs."
+end
+
+if $opts.update?
+  Minecraft::Tools.download_minecraft
+end
+
+if $opts.tempmobs?
+  puts "[+] Temporarily toggling mobs."
+  Minecraft::Tools.toggle_mobs
+end
+
+unless $opts.no_run?
+  Minecraft::Tools.check_jarfile
+  command = Minecraft::Tools.command($opts)
+  puts "[+] #{command}"
+  server = Minecraft::Server.new(command)
+  server.sin.puts("save-on") unless $opts.no_auto_save?
+end
