@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require "minecraft"
+
+server = Minecraft::Server.new("java -Xmx1024M -Xms512M -jar minecraft_server.jar nogui")
+server.sin.puts("save-on")
