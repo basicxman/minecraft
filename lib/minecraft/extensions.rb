@@ -5,6 +5,8 @@ module Minecraft
     def initialize
       @ops = File.readlines("ops.txt").map { |s| s.chomp }
       @users = []
+      @timers = {}
+      @counter = 0
 
       # Command set.
       @commands = {}
@@ -13,6 +15,10 @@ module Minecraft
       add_command(:kit,  :ops => true,  :all => true, :all_message => "is providing kits to all.")
       add_command(:help, :ops => false, :all => false)
       add_command(:nom,  :ops => true,  :all => true, :all_message => "is providing noms to all.")
+      add_command(:list, :ops => false, :all => false)
+      add_command(:addtimer,   :ops => true, :all => false)
+      add_command(:deltimer,   :ops => true, :all => false)
+      add_command(:printtimer, :ops => true, :all => false)
     end
 
     def call_command(user, command, *args)
@@ -53,6 +59,21 @@ module Minecraft
     rescue Exception => e
       puts "An error has occurred."
       puts e
+    end
+
+    def periodic
+      @counter += 1
+      ret = ""
+      @users.each do |user|
+        next unless @timers.has_key? user
+        @timers[user].each do |item, duration|
+          next if duration.nil?
+          if @counter % duration == 0
+            ret += "give #{user} #{item} 64\n"
+          end
+        end
+      end
+      return ret.chomp
     end
 
     def info_command(line)

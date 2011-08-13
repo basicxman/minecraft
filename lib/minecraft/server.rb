@@ -10,6 +10,7 @@ module Minecraft
       threads = []
       threads << Thread.new { loop { process(@sout.gets) } }
       threads << Thread.new { loop { process(@serr.gets) } }
+      threads << Thread.new { loop { mc_exec @extensions.periodic; sleep 1 } }
       threads << Thread.new { loop { @sin.puts gets } }
       threads.each(&:join)
     end
@@ -17,6 +18,10 @@ module Minecraft
     def process(line)
       result = @extensions.process(line)
       @sin.puts(result) unless result.nil?
+    end
+
+    def mc_exec(commands)
+      @sin.puts(commands) unless commands == ""
     end
   end
 end
