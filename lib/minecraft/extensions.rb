@@ -1,12 +1,16 @@
+require "json/pure"
+
 module Minecraft
   class Extensions
     include Commands
 
     def initialize
       @ops = File.readlines("ops.txt").map { |s| s.chomp }
+      @userlog = get_user_log
       @users = []
       @timers = {}
       @counter = 0
+      @logon_time = {}
 
       # Command set.
       @commands = {}
@@ -19,6 +23,18 @@ module Minecraft
       add_command(:addtimer,   :ops => true, :all => false)
       add_command(:deltimer,   :ops => true, :all => false)
       add_command(:printtimer, :ops => true, :all => false)
+    end
+
+    def get_user_log
+      if File.exists? "user.log"
+        JSON.parse(File.read("user.log"))
+      else
+        {}
+      end
+    end
+
+    def write_log
+      File.open("user.log", "w") { |f| f.print @userlog.to_json }
     end
 
     def call_command(user, command, *args)
@@ -107,9 +123,11 @@ module Minecraft
       user = line.split(" ").first
       if line.index "lost connection"
         @users.reject! { |u| u == user }
+        log_time(user)
         return true
       elsif line.index "logged in"
         @users << user
+        @logon_time[user] = Time.now
         return true
       end
     end
@@ -120,6 +138,15 @@ module Minecraft
       else
         puts "Invalid command given."
       end
+    end
+
+    def log_time(user)
+      logoff = Time.now
+      logon  = @logon_time[user]
+      time_spent = logoff - logon
+      @userlog[user] ||= 0
+      @userlog[user] += time_spent
+      write_log
     end
 
     def is_op?(user)

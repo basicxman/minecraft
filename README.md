@@ -29,22 +29,26 @@ Current Features
   - Give the user an item with a quantity of up to 2560 (by default Minecraft
   will cap at 64).
   - Use the item ID or item name. http://minecraftwiki.net/wiki/Data_values
+- !giveall <item> <quantity>
 - !tp <target_user>
+- !tpall
 - !nom
-- !kit
+- !nomall
+- !kit <group>
   - Diamond
   - Gold armour
   - Armour
   - Ranged
   - Nether
   - Portal
+- !kitall <group>
+- !addtimer <item> <frequency>
+- !deltimer <item>
+- !printtimer
+- !list
 
 TODO
 ----
-
-- Improved error handling.
-- Log time users have spent on the server.
-- !give timers (give user A an item every X seconds).
 
 Contributors
 ------------

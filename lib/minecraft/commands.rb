@@ -44,7 +44,7 @@ module Minecraft
           suf = "]"
         end
         suf = "*" + suf if is_op? u
-        s + ", #{pre}#{u}#{suf}"
+        s + "#{", " unless s.empty?}#{pre}#{u}#{suf}"
       end
       return "say #{l}"
     end
@@ -70,13 +70,9 @@ module Minecraft
     def help(*args)
       <<-eof
 say !tp target_user
-say !tpall
 say !kit kit_name
-say !kitall kit_name
 say !give item quantity
-say !giveall item quantity
 say !nom
-say !nomall
 say !list
 say !addtimer item frequency
 say !deltimer item
