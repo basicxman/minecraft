@@ -4,13 +4,14 @@ module Minecraft
   class Extensions
     include Commands
 
-    def initialize
+    def initialize(server)
       @ops = File.readlines("ops.txt").map { |s| s.chomp }
       @userlog = get_user_log
       @users = []
       @timers = {}
       @counter = 0
       @logon_time = {}
+      @server = server
 
       # Command set.
       @commands = {}
@@ -44,25 +45,23 @@ module Minecraft
 
       # Any `all` suffixed command requires ops.
       if @commands[root][:ops] or (is_all and @commands[root][:all])
-        return privilege_error(user, command) unless is_op? user
+        return if !validate_ops(user, command)
       end
 
       if respond_to? "validate_" + root.to_s
-        result = send("validate_" + root.to_s, *args)
-        return result unless result.nil?
+        return unless send("validate_" + root.to_s, *args)
       end
 
       if is_all
-        ret = "say #{user} #{@commands[root][:all_message]}\n"
+        @server.puts "say #{user} #{@commands[root][:all_message]}"
         if respond_to? command
-          ret += send(command, user, *args)
+          send(command, user, *args)
         else
-          @users.each { |u| ret += send(root, u, *args) + "\n" }
+          @users.each { |u| send(root, u, *args) }
         end
       else
-        ret = send(root, user, *args)
+        send(root, user, *args)
       end
-      return ret.chomp
     end
 
     def add_command(command, opts)
@@ -75,21 +74,18 @@ module Minecraft
     rescue Exception => e
       puts "An error has occurred."
       puts e
+      puts e.backtrace
     end
 
     def periodic
       @counter += 1
-      ret = ""
       @users.each do |user|
         next unless @timers.has_key? user
         @timers[user].each do |item, duration|
           next if duration.nil?
-          if @counter % duration == 0
-            ret += "give #{user} #{item} 64\n"
-          end
+          @server.puts "give #{user} #{item} 64" if @counter % duration == 0
         end
       end
-      return ret.chomp
     end
 
     def info_command(line)
@@ -100,7 +96,7 @@ module Minecraft
 
       user = match_data[1]
       args = match_data[2].split(" ")
-      return call_command(user, args.slice!(0).to_sym, *args)
+      call_command(user, args.slice!(0).to_sym, *args)
     end
 
     def meta_check(line)
@@ -147,18 +143,20 @@ module Minecraft
       @userlog[user] ||= 0
       @userlog[user] += time_spent
       write_log
+      @server.puts "#{user} spent #{time_spent} seconds the server, totalling to #{@userlog[user]}."
     end
 
     def is_op?(user)
       @ops.include? user
     end
 
-    def privilege_error(user, command)
-      "say #{user} is not an op, cannot use !#{command}."
+    def validate_ops(user, command)
+      return true if is_op? user
+      @server.puts "say #{user} is not an op, cannot use !#{command}."
     end
 
     def invalid_command(command)
-      "say #{command} is invalid."
+      @server.puts "say #{command} is invalid."
     end
   end
 end

@@ -6,35 +6,34 @@ module Minecraft
       item, quantity = items_arg(1, args)
       item = resolve_item(item)
 
-      return quantify(user, item, quantity)
+      quantify(user, item, quantity)
     end
 
     def validate_kit(group)
-      return "say #{group} is not a valid kit." unless KITS.include? group.to_sym
+      return true if KITS.include? group.to_sym
+      @server.puts "say #{group} is not a valid kit."
     end
 
     def kit(user, group)
-      ret = ""
       KITS[group.to_sym].each do |item|
         if item.is_a? Array
-          ret += quantify(user, item.first, item.last)
+          @server.puts quantify(user, item.first, item.last)
         else
-          ret += "give #{user} #{item} 1\n"
+          @server.puts "give #{user} #{item} 1"
         end
       end
-      return ret.chomp
     end
 
     def tp(user, target)
-      "tp #{user} #{target}"
+      @server.puts "tp #{user} #{target}"
     end
 
     def tpall(user, *args)
-      @users.inject("") { |s, u| s + tp(u, user) + "\n" }.chomp
+      @users.each { |u| tp(u, user) }
     end
 
     def nom(user)
-      "give #{user} 322 1"
+      @server.puts "give #{user} 322 1"
     end
 
     def list(user)
@@ -46,7 +45,7 @@ module Minecraft
         suf = "*" + suf if is_op? u
         s + "#{", " unless s.empty?}#{pre}#{u}#{suf}"
       end
-      return "say #{l}"
+      @server.puts "say #{l}"
     end
 
     def addtimer(user, *args)
@@ -54,7 +53,7 @@ module Minecraft
       item = resolve_item(item)
       @timers[user] ||= {}
       @timers[user][item] = duration
-      return "say Timer added for #{user}.  Giving #{item} every #{duration} seconds."
+      @server.puts "say Timer added for #{user}.  Giving #{item} every #{duration} seconds."
     end
 
     def deltimer(user, *args)
@@ -64,11 +63,11 @@ module Minecraft
     end
 
     def printtimer(user)
-      return "say Timer is at #{@counter}."
+      @server.puts "say Timer is at #{@counter}."
     end
 
     def help(*args)
-      <<-eof
+      @server.puts <<-eof
 say !tp target_user
 say !kit kit_name
 say !give item quantity
@@ -80,14 +79,16 @@ say !deltimer item
     end
 
     def quantify(user, item, quantity)
-      return "give #{user} #{item} #{quantity}" if quantity <= 64
+      if quantity <= 64
+        @server.puts "give #{user} #{item} #{quantity}"
+        return
+      end
 
       quantity = 2560 if quantity > 2560
       full_quantity = (quantity / 64.0).floor
       sub_quantity  = quantity % 64
-      ret = "give #{user} #{item} 64\n" * full_quantity
-      ret += "give #{user} #{item} #{sub_quantity}"
-      return ret
+      @server.puts "give #{user} #{item} 64\n" * full_quantity
+      @server.puts "give #{user} #{item} #{sub_quantity}"
     end
 
     def items_arg(default, args)
