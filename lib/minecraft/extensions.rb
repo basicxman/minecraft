@@ -1,31 +1,74 @@
 module Minecraft
   class Extensions
-    include Data
+    include Commands
 
     def initialize
-      @ops = File.readlines("ops.txt").map { |s| s.chop }
+      @ops = File.readlines("ops.txt").map { |s| s.chomp }
       @users = []
+
+      # Command set.
+      @commands = {}
+      add_command(:give, :ops => true,  :all => true, :all_message => "is putting out.")
+      add_command(:tp,   :ops => false, :all => true, :all_message => "is teleporting all users to their location.")
+      add_command(:kit,  :ops => true,  :all => true, :all_message => "is providing kits to all.")
+      add_command(:help, :ops => false, :all => false)
+      add_command(:nom,  :ops => true,  :all => true, :all_message => "is providing noms to all.")
+    end
+
+    def call_command(user, command, *args)
+      is_all = command.to_s.end_with? "all"
+      root   = command.to_s.chomp("all").to_sym
+      return invalid_command(command) unless @commands.include? root
+
+      # Any `all` suffixed command requires ops.
+      if @commands[root][:ops] or (is_all and @commands[root][:all])
+        return privilege_error(user, command) unless is_op? user
+      end
+
+      if respond_to? "validate_" + root.to_s
+        result = send("validate_" + root.to_s, *args)
+        return result unless result.nil?
+      end
+
+      if is_all
+        ret = "say #{user} #{@commands[root][:all_message]}\n"
+        if respond_to? command
+          ret += send(command, user, *args)
+        else
+          @users.each { |u| ret += send(root, u, *args) + "\n" }
+        end
+      else
+        ret = send(root, user, *args)
+      end
+      return ret.chomp
+    end
+
+    def add_command(command, opts)
+      @commands[command] = opts
     end
 
     def process(line)
       puts line
       return info_command(line) if line.index "INFO"
+    rescue Exception => e
+      puts "An error has occurred."
+      puts e
     end
 
     def info_command(line)
       line.gsub! /^.*?\[INFO\]\s+/, ''
-      meta_check(line)
+      return if meta_check(line)
       match_data = line.match /^\<(.*?)\>\s+!(.*?)$/
       return if match_data.nil?
 
       user = match_data[1]
       args = match_data[2].split(" ")
-      return send(args.slice!(0), user, *args)
+      return call_command(user, args.slice!(0).to_sym, *args)
     end
 
     def meta_check(line)
-      return if check_ops(line)
-      return if check_join_part(line)
+      return true if check_ops(line)
+      return true if check_join_part(line)
     end
 
     def check_ops(line)
@@ -51,103 +94,23 @@ module Minecraft
     end
 
     def method_missing(sym, *args)
-      if DATA_VALUE_HASH.has_key? sym.downcase
+      if DATA_VALUE_HASH.has_key? sym.downcase and is_op? args.first
         give(args.first, sym, args.last)
       else
         puts "Invalid command given."
       end
     end
 
-    def giveall(user, *args)
-      return privilege_error(user, "giveall") unless is_op? user
-      ret = "say #{user} is putting out!\n"
-      @users.each do |u|
-        ret += mc_give(u, *args)
-      end
-
-      return ret
-    end
-
-    def give(user, *args)
-      return privilege_error(user, "give") unless is_op? user
-      return mc_give(user, *args)
-    end
-
-    def mc_give(user, *args)
-      if args.length == 1
-        quantity = 1
-        item = args.first
-      else
-        quantity = args.last.to_i || 1
-        item = args[0..-2].join(" ")
-      end
-      item = (item.to_i.to_s == item) ? item.to_i : DATA_VALUE_HASH[item.downcase]
-
-      return quantify(user, item, quantity)
-    end
-
-    def kit(user, group)
-      return privilege_error(user, "kit") unless is_op? user
-      return "say #{group} is not a valid kit." unless KITS.has_key? group.to_sym
-      ret = ""
-
-      KITS[group.to_sym].each do |item|
-        if item.is_a? Array
-          ret += quantify(user, item.first, item.last)
-        else
-          ret += "give #{user} #{item} 1\n"
-        end
-      end
-      return ret.chop
-    end
-
-    def tp(user, target)
-      "tp #{user} #{target}"
-    end
-
-    def tpall(user)
-      return privilege_error(user, "tpall", "Wow, #{user} actually tried to pull that...") unless is_op? user
-      ret = "say #{user} is teleporting all users to their location.\n"
-      @users.each do |u|
-        ret += tp(u, user)
-      end
-      return ret
-    end
-
-    def nom(user)
-      return privilege_error(user, "nom", "No noms for you!") unless is_op? user
-      "give #{user} 322 1"
-    end
-
-    def help(*args)
-      <<-eof
-say !tp target_user
-say !tpall
-say !kit kit_name
-say !give item quantity
-say !giveall item quantity
-say !nom
-say /help
-      eof
-    end
-
-    def quantify(user, item, quantity)
-      return "give #{user} #{item} #{quantity}" if quantity <= 64
-
-      quantity = 2560 if quantity > 2560
-      full_quantity = (quantity / 64.0).floor
-      sub_quantity  = quantity % 64
-      ret = "give #{user} #{item} 64\n" * full_quantity
-      ret += "give #{user} #{item} #{sub_quantity}"
-      return ret
-    end
-
     def is_op?(user)
       @ops.include? user
     end
 
-    def privilege_error(user, command, suffix = "S/he must be humiliated!")
-      "say #{user} is not an op, cannot use !#{command}.  #{suffix}"
+    def privilege_error(user, command)
+      "say #{user} is not an op, cannot use !#{command}."
+    end
+
+    def invalid_command(command)
+      "say #{command} is invalid."
     end
   end
 end
