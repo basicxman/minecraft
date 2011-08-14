@@ -9,9 +9,10 @@ module Minecraft
       quantify(user, item, quantity)
     end
 
-    def validate_kit(group)
+    def validate_kit(group = "")
       return true if KITS.include? group.to_sym
       @server.puts "say #{group} is not a valid kit."
+      kitlist
     end
 
     def kit(user, group)
@@ -42,7 +43,7 @@ module Minecraft
           pre = "["
           suf = "]"
         end
-        suf = "*" + suf if is_op? u
+        suf = "*" + (suf || "") if is_op? u
         s + "#{", " unless s.empty?}#{pre}#{u}#{suf}"
       end
       @server.puts "say #{l}"
@@ -78,6 +79,10 @@ say !deltimer item
       eof
     end
 
+    def kitlist(*args)
+      @server.puts "say Kits: #{KITS.keys.join(", ")}"
+    end
+
     def quantify(user, item, quantity)
       if quantity <= 64
         @server.puts "give #{user} #{item} #{quantity}"
@@ -88,7 +93,7 @@ say !deltimer item
       full_quantity = (quantity / 64.0).floor
       sub_quantity  = quantity % 64
       @server.puts "give #{user} #{item} 64\n" * full_quantity
-      @server.puts "give #{user} #{item} #{sub_quantity}"
+      @server.puts "give #{user} #{item} #{sub_quantity}" if sub_quantity > 0
     end
 
     def items_arg(default, args)

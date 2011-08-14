@@ -21,9 +21,10 @@ module Minecraft
       add_command(:help, :ops => false, :all => false)
       add_command(:nom,  :ops => true,  :all => true, :all_message => "is providing noms to all.")
       add_command(:list, :ops => false, :all => false)
-      add_command(:addtimer,   :ops => true, :all => false)
-      add_command(:deltimer,   :ops => true, :all => false)
-      add_command(:printtimer, :ops => true, :all => false)
+      add_command(:addtimer,   :ops => true,  :all => false)
+      add_command(:deltimer,   :ops => true,  :all => false)
+      add_command(:printtimer, :ops => true,  :all => false)
+      add_command(:kitlist,    :ops => false, :all => false)
     end
 
     def get_user_log
@@ -142,8 +143,8 @@ module Minecraft
       time_spent = logoff - logon
       @userlog[user] ||= 0
       @userlog[user] += time_spent
+      @server.puts "say #{user} spent #{time_spent} seconds the server, totalling to #{@userlog[user]}."
       write_log
-      @server.puts "#{user} spent #{time_spent} seconds the server, totalling to #{@userlog[user]}."
     end
 
     def is_op?(user)

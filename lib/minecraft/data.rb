@@ -70,7 +70,7 @@ module Minecraft
       "lava"                    => "10",
       "dead shrubs"             => "32",
       "double stone slab"       => "43",
-      "furnace "                => "61",
+      "furnace"                 => "61",
       "fence"                   => "85",
       "stationary lava "        => "11",
       "piston"                  => "33",
