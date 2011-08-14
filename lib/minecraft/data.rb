@@ -246,5 +246,12 @@ module Minecraft
       "saddle"                  => "329",
       "cocoa beans"             => "351"
     }
+
+    ITEM_BUCKETS = {}
+    DATA_VALUE_HASH.each_key do |key|
+      bucket = key[0]
+      ITEM_BUCKETS[bucket] ||= []
+      ITEM_BUCKETS[bucket] << key
+    end
   end
 end

@@ -101,14 +101,43 @@ say !deltimer item
         second = default
         first  = args.first
       else
-        second = args.last.to_i || default
-        first  = args[0..-2].join(" ")
+        if args.last.to_i.to_s == args.last # Last argument is an integer.
+          second = args.last.to_i
+          first  = args[0..-2].join(" ")
+        else
+          second = default
+          first = args[0..-1].join(" ")
+        end
       end
       return [first, second]
     end
 
     def resolve_item(item)
-      item.to_i.to_s == item ? item.to_i : DATA_VALUE_HASH[item.downcase]
+      item.to_i.to_s == item ? item.to_i : DATA_VALUE_HASH[resolve_key(item.downcase)]
+    end
+
+    def resolve_key(key)
+      bucket = key[0]
+      return key if ITEM_BUCKETS[bucket].include? key
+
+      puts "Finding #{key} approximate in #{ITEM_BUCKETS[bucket]}"
+      shortest_diff = nil
+      shortest_key  = nil
+      ITEM_BUCKETS[bucket].each do |test_key|
+        if test_key.length > key.length
+          diff = test_key.length - key.length if test_key.index(key)
+        else
+          diff = key.length - test_key.length if key.index(test_key)
+        end
+        next if diff.nil?
+
+        if shortest_diff.nil? or diff < shortest_diff
+          shortest_key = test_key
+          shortest_diff = diff
+        end
+      end
+
+      return shortest_key
     end
   end
 end
