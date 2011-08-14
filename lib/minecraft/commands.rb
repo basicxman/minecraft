@@ -37,6 +37,22 @@ module Minecraft
       @server.puts "give #{user} 322 1"
     end
 
+    def property(user, key)
+      @server.puts "say #{key} is currently #{@server_properties[key]}" if @server_properties.include? key
+    end
+
+    def uptime(user, target_user = nil)
+      target_user ||= user
+      if @userlog.has_key? target_user
+        total = "  Out of a total of #{@userlog[target_user]} seconds."
+      end
+      @server.puts "say #{target_user} has been online for #{Time.now - @logon_time[user]}.#{total}"
+    end
+
+    def rules(*args)
+      @server.puts "say #{@rules}"
+    end
+
     def list(user)
       l = @users.inject("") do |s, u|
         if u == user

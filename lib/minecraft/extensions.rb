@@ -4,7 +4,7 @@ module Minecraft
   class Extensions
     include Commands
 
-    def initialize(server)
+    def initialize(server, rules = "No rules specified.")
       @ops = File.readlines("ops.txt").map { |s| s.chomp }
       @userlog = get_user_log
       @users = []
@@ -12,19 +12,24 @@ module Minecraft
       @counter = 0
       @logon_time = {}
       @server = server
+      @rules = rules
+      load_server_properties
 
       # Command set.
       @commands = {}
-      add_command(:give, :ops => true,  :all => true, :all_message => "is putting out.")
-      add_command(:tp,   :ops => false, :all => true, :all_message => "is teleporting all users to their location.")
-      add_command(:kit,  :ops => true,  :all => true, :all_message => "is providing kits to all.")
-      add_command(:help, :ops => false, :all => false)
-      add_command(:nom,  :ops => true,  :all => true, :all_message => "is providing noms to all.")
-      add_command(:list, :ops => false, :all => false)
+      add_command(:give,  :ops => true,  :all => true, :all_message => "is putting out.")
+      add_command(:tp,    :ops => false, :all => true, :all_message => "is teleporting all users to their location.")
+      add_command(:kit,   :ops => true,  :all => true, :all_message => "is providing kits to all.")
+      add_command(:help,  :ops => false, :all => false)
+      add_command(:rules, :ops => false, :all => false)
+      add_command(:nom,   :ops => true,  :all => true, :all_message => "is providing noms to all.")
+      add_command(:list,  :ops => false, :all => false)
+      add_command(:uptime,     :ops => false, :all => false)
       add_command(:addtimer,   :ops => true,  :all => false)
       add_command(:deltimer,   :ops => true,  :all => false)
       add_command(:printtimer, :ops => true,  :all => false)
       add_command(:kitlist,    :ops => false, :all => false)
+      add_command(:property,   :ops => true,  :all => false)
     end
 
     def get_user_log
@@ -158,6 +163,15 @@ module Minecraft
 
     def invalid_command(command)
       @server.puts "say #{command} is invalid."
+    end
+
+    def load_server_properties
+      @server_properties = {}
+      File.readlines("server.properties").each do |line|
+        next if line[0] == "#"
+        key, value = line.split("=")
+        @server_properties[key] = value
+      end
     end
   end
 end
