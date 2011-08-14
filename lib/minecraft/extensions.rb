@@ -113,10 +113,10 @@ module Minecraft
     def check_ops(line)
       user = line.split(" ").last
       if line.index "De-opping"
-        @ops.reject! { |u| u == user }
+        @ops.reject! { |u| u == user.downcase }
         return true
       elsif line.index "Opping"
-        @ops << user
+        @ops << user.downcase
         return true
       end
     end
@@ -153,7 +153,7 @@ module Minecraft
     end
 
     def is_op?(user)
-      @ops.include? user
+      @ops.include? user.downcase
     end
 
     def validate_ops(user, command)
