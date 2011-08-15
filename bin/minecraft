@@ -24,6 +24,7 @@ $opts = Slop.parse :help => true do
   on :no_auto_save,   "Disable auto save."
   on :m, :tempmobs,   "Temporarily toggles mobs."
   on :r, :rules,      "Specify the server rules.", :optional => true
+  on :w, :welcome_message, "Specfiy a welcome message to connecting users.", :optional => true
 end
 
 if $opts.update?
@@ -39,6 +40,6 @@ unless $opts.no_run?
   Minecraft::Tools.check_jarfile
   command = Minecraft::Tools.command($opts)
   puts "[+] #{command}"
-  server = Minecraft::Server.new(command, $opts[:rules])
+  server = Minecraft::Server.new(command, $opts)
   server.sin.puts("save-on") unless $opts.no_auto_save?
 end

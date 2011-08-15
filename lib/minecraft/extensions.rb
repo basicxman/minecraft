@@ -4,7 +4,7 @@ module Minecraft
   class Extensions
     include Commands
 
-    def initialize(server, rules = "No rules specified.")
+    def initialize(server, opts)
       @ops = File.readlines("ops.txt").map { |s| s.chomp }
       @userlog = get_user_log
       @users = []
@@ -12,8 +12,12 @@ module Minecraft
       @counter = 0
       @logon_time = {}
       @server = server
-      @rules = rules
       load_server_properties
+
+      opts = {
+        :rules => "No rules specified."
+      }.merge(opts)
+      opts.each { |k, v| instance_variable_set("@#{k}", v) }
 
       # Command set.
       @commands = {}
@@ -143,6 +147,7 @@ module Minecraft
         return remove_user(user)
       elsif line.index "logged in"
         @users << user
+        display_welcome_message(user)
         @logon_time[user] = Time.now
         return true
       end
@@ -192,6 +197,10 @@ module Minecraft
         key, value = line.split("=")
         @server_properties[key] = value
       end
+    end
+
+    def display_welcome_message(user)
+      @server.puts "say #{@welcome_message.gsub('%', user)}" unless @welcome_message.nil?
     end
   end
 end

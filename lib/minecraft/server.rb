@@ -4,9 +4,9 @@ module Minecraft
   class Server
     attr_accessor :sin
 
-    def initialize(command, rules)
+    def initialize(command, opts)
       @sin, @sout, @serr = Open3.popen3(command)
-      @extensions = Extensions.new(@sin, rules)
+      @extensions = Extensions.new(@sin, opts)
       threads = []
       threads << Thread.new { loop { @extensions.process(@sout.gets) } }
       threads << Thread.new { loop { @extensions.process(@serr.gets) } }
