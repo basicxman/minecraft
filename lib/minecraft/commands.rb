@@ -43,10 +43,11 @@ module Minecraft
 
     def uptime(user, target_user = nil)
       target_user ||= user
+      time_spent = calculate_uptime(target_user)
       if @userlog.has_key? target_user
-        total = "  Out of a total of #{@userlog[target_user]} seconds."
+        total = "  Out of a total of #{format_uptime(@userlog[target_user] + time_spent)} minutes."
       end
-      @server.puts "say #{target_user} has been online for #{Time.now - @logon_time[user]}.#{total}"
+      @server.puts "say #{target_user} has been online for #{format_uptime(time_spent)} minutes.#{total}"
     end
 
     def rules(*args)

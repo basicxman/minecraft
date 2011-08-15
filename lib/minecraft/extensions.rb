@@ -106,8 +106,23 @@ module Minecraft
     end
 
     def meta_check(line)
+      return true if check_kick_ban(line)
       return true if check_ops(line)
       return true if check_join_part(line)
+    end
+
+    def remove_user(user)
+      @users.reject! { |u| u.downcase == user.downcase }
+      return true
+    end
+
+    def check_kick_ban(line)
+      user = line.split(" ").last
+      if line.index "Banning"
+        return remove_user(user)
+      elsif line.index "Kicking"
+        return remove_user(user)
+      end
     end
 
     def check_ops(line)
@@ -124,9 +139,8 @@ module Minecraft
     def check_join_part(line)
       user = line.split(" ").first
       if line.index "lost connection"
-        @users.reject! { |u| u == user }
         log_time(user)
-        return true
+        return remove_user(user)
       elsif line.index "logged in"
         @users << user
         @logon_time[user] = Time.now
@@ -143,13 +157,19 @@ module Minecraft
     end
 
     def log_time(user)
-      logoff = Time.now
-      logon  = @logon_time[user]
-      time_spent = logoff - logon
+      time_spent = calculate_uptime(user)
       @userlog[user] ||= 0
       @userlog[user] += time_spent
-      @server.puts "say #{user} spent #{time_spent} seconds the server, totalling to #{@userlog[user]}."
+      @server.puts "say #{user} spent #{format_uptime(time_spent)} minutes the server, totalling to #{format_uptime(@userlog[user])}."
       write_log
+    end
+
+    def format_uptime(time)
+      (time / 60.0).round(2)
+    end
+
+    def calculate_uptime(user)
+      Time.now - @logon_time[user]
     end
 
     def is_op?(user)
