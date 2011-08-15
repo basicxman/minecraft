@@ -135,6 +135,7 @@ say !deltimer item
 
     def resolve_key(key)
       bucket = key[0]
+      return no_key(key) unless ITEM_BUCKETS.include? bucket
       return key if ITEM_BUCKETS[bucket].include? key
 
       puts "Finding #{key} approximate in #{ITEM_BUCKETS[bucket]}"
@@ -154,8 +155,12 @@ say !deltimer item
         end
       end
 
-      @server.puts "say No item #{key} found." if shortest_key.nil?
+      no_key(key) if shortest_key.nil?
       return shortest_key
+    end
+
+    def no_key(key)
+      @server.puts "say No item #{key} found."
     end
 
     def is_quantifier?(quantity)
