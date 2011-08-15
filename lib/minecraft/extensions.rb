@@ -160,7 +160,7 @@ module Minecraft
       time_spent = calculate_uptime(user)
       @userlog[user] ||= 0
       @userlog[user] += time_spent
-      @server.puts "say #{user} spent #{format_uptime(time_spent)} minutes the server, totalling to #{format_uptime(@userlog[user])}."
+      @server.puts "say #{user} spent #{format_uptime(time_spent)} minutes in the server, totalling to #{format_uptime(@userlog[user])}."
       write_log
     end
 

@@ -6,7 +6,7 @@ module Minecraft
       item, quantity = items_arg(1, args)
       item = resolve_item(item)
 
-      quantify(user, item, quantity)
+      construct_give(user, item, quantity)
     end
 
     def validate_kit(group = "")
@@ -18,7 +18,7 @@ module Minecraft
     def kit(user, group)
       KITS[group.to_sym].each do |item|
         if item.is_a? Array
-          @server.puts quantify(user, item.first, item.last)
+          @server.puts construct_give(user, item.first, item.last)
         else
           @server.puts "give #{user} #{item} 1"
         end
@@ -100,7 +100,7 @@ say !deltimer item
       @server.puts "say Kits: #{KITS.keys.join(", ")}"
     end
 
-    def quantify(user, item, quantity)
+    def construct_give(user, item, quantity)
       if quantity <= 64
         @server.puts "give #{user} #{item} #{quantity}"
         return
@@ -118,8 +118,8 @@ say !deltimer item
         second = default
         first  = args.first
       else
-        if args.last.to_i.to_s == args.last # Last argument is an integer.
-          second = args.last.to_i
+        if is_quantifier? args.last
+          second = quantify(args.last)
           first  = args[0..-2].join(" ")
         else
           second = default
@@ -154,7 +154,27 @@ say !deltimer item
         end
       end
 
+      @server.puts "say No item #{key} found." if shortest_key.nil?
       return shortest_key
+    end
+
+    def is_quantifier?(quantity)
+      quantity.index(/[0-9]+[a-z]?/) == 0
+    end
+
+    def quantify(value)
+      return value.scan(/[0-9]+[a-z]?/).inject(0) do |total, term|
+        quantity, flag = term.match(/([0-9]+)([a-z]?)/)[1..2]
+        quantity = quantity.to_i
+        return total + quantity if flag.nil?
+
+        total + case flag
+        when 'm' then [2560, quantity * 64].min
+        when 'd' then (64.0 / [1, quantity].max).round
+        when 's' then [1, 64 - quantity].max
+        else quantity
+        end
+      end
     end
   end
 end
