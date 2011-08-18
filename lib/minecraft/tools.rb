@@ -1,3 +1,5 @@
+require "net/http"
+
 module Minecraft
   module Tools
     def self.check_jarfile

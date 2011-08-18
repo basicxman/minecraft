@@ -1,20 +1,9 @@
 #!/usr/bin/env ruby
 
 require "slop"
-require "net/http"
 require "minecraft"
 
-def minecraft_exit
-  if $opts.tempmobs?
-    puts "[+] Restoring previous mob state."
-    Minecraft::Tools.toggle_mobs
-  end
-  exit!
-end
-
-trap("SIGINT") { minecraft_exit }
-
-$opts = Slop.parse :help => true do
+opts = Slop.parse :help => true do
   banner "Usage: minecraft [options]"
 
   on :n, :no_run,     "Don't run the Minecraft server instance."
@@ -27,19 +16,4 @@ $opts = Slop.parse :help => true do
   on :w, :welcome_message, "Specfiy a welcome message to connecting users.", :optional => true
 end
 
-if $opts.update?
-  Minecraft::Tools.download_minecraft
-end
-
-if $opts.tempmobs?
-  puts "[+] Temporarily toggling mobs."
-  Minecraft::Tools.toggle_mobs
-end
-
-unless $opts.no_run?
-  Minecraft::Tools.check_jarfile
-  command = Minecraft::Tools.command($opts)
-  puts "[+] #{command}"
-  server = Minecraft::Server.new(command, $opts)
-  server.sin.puts("save-on") unless $opts.no_auto_save?
-end
+runtime = Minecraft::Runtime.new(opts)
