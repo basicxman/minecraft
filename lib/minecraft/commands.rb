@@ -81,6 +81,16 @@ module Minecraft
     end
 
     def printtimer(user)
+      unless @timers.has_key? user || @timers[user].length == 0
+        @server.puts "say No timers have been added for #{user}."
+        return
+      end
+      @timers[user].each do |item, frequency|
+        @server.puts "say #{item} every #{frequency} seconds."
+      end
+    end
+
+    def printtime(user)
       @server.puts "say Timer is at #{@counter}."
     end
 

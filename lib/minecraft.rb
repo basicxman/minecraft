@@ -1,3 +1,4 @@
+require "json/pure"
 require "minecraft/tools"
 require "minecraft/data"
 require "minecraft/commands"

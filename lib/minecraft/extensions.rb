@@ -1,14 +1,12 @@
-require "json/pure"
-
 module Minecraft
   class Extensions
     include Commands
 
     def initialize(server, opts)
       @ops = File.readlines("ops.txt").map { |s| s.chomp }
-      @userlog = get_user_log
+      @userlog = get_json("user.log")
       @users = []
-      @timers = {}
+      @timers = get_json("user_timers.json")
       @counter = 0
       @logon_time = {}
       @server = server
@@ -32,16 +30,21 @@ module Minecraft
       add_command(:addtimer,   :ops => true,  :all => false)
       add_command(:deltimer,   :ops => true,  :all => false)
       add_command(:printtimer, :ops => true,  :all => false)
+      add_command(:printtime,  :ops => true,  :all => false)
       add_command(:kitlist,    :ops => false, :all => false)
       add_command(:property,   :ops => true,  :all => false)
     end
 
-    def get_user_log
-      if File.exists? "user.log"
-        JSON.parse(File.read("user.log"))
+    def get_json(file)
+      if File.exists? file
+        JSON.parse(File.read(file))
       else
         {}
       end
+    end
+
+    def save_timers
+      File.open("user_timers.json", "w") { |f| f.print @timers.to_json }
     end
 
     def write_log

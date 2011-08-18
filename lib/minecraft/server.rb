@@ -26,6 +26,7 @@ module Minecraft
       end
 
       puts "\n[+] Saving..."
+      @extensions.save_timers
       @sin.puts("save-all")
       @sin.puts("exit")
       exit!
