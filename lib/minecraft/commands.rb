@@ -71,7 +71,7 @@ module Minecraft
       item = resolve_item(item)
       @timers[user] ||= {}
       @timers[user][item] = duration
-      @server.puts "say Timer added for #{user}.  Giving #{item} every #{duration} seconds."
+      @server.puts "say Timer added for #{user}.  Giving item id #{item} every #{duration} seconds."
     end
 
     def deltimer(user, *args)
@@ -138,7 +138,6 @@ say !deltimer item
       return no_key(key) unless ITEM_BUCKETS.include? bucket
       return key if ITEM_BUCKETS[bucket].include? key
 
-      puts "Finding #{key} approximate in #{ITEM_BUCKETS[bucket]}"
       shortest_diff = nil
       shortest_key  = nil
       ITEM_BUCKETS[bucket].each do |test_key|

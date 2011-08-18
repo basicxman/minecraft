@@ -15,7 +15,7 @@ module Minecraft
       threads << Thread.new { loop { @extensions.process(@sout.gets) } }
       threads << Thread.new { loop { @extensions.process(@serr.gets) } }
       threads << Thread.new { loop { @extensions.periodic; sleep 1 } }
-      threads << Thread.new { loop { @sin.puts gets } }
+      threads << Thread.new { loop { @sin.puts $stdin.gets } }
       threads.each(&:join)
     end
     

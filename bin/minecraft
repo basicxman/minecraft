@@ -13,6 +13,7 @@ opts = Slop.parse :help => true do
   on :no_auto_save,   "Disable auto save."
   on :m, :tempmobs,   "Temporarily toggles mobs."
   on :r, :rules,      "Specify the server rules.", :optional => true
+  on :f, :savefreq,   "Specify the frequency in seconds to save the server.", :optional => true
   on :w, :welcome_message, "Specfiy a welcome message to connecting users.", :optional => true
 end
 

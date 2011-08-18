@@ -87,8 +87,20 @@ module Minecraft
       puts e.backtrace
     end
 
+    def check_save
+      if @savefreq.nil?
+        freq = 30
+      elsif @savefreq == 0
+        return
+      else
+        freq = @savefreq.to_i
+      end
+      @server.puts "save-all" if @counter % freq == 0
+    end
+
     def periodic
       @counter += 1
+      check_save
       @users.each do |user|
         next unless @timers.has_key? user
         @timers[user].each do |item, duration|
