@@ -29,6 +29,7 @@ module Minecraft
       content.gsub! "spawn-monsters=#{state}", "spawn-monsters=#{new_state}"
 
       File.open("server.properties", "w") { |f| f.print content }
+      return new_state
     end
   end
 end

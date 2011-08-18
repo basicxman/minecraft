@@ -7,6 +7,7 @@ module Minecraft
       @userlog = get_json("user.log")
       @users = []
       @timers = get_json("user_timers.json")
+      @shortcuts = get_json("user_shortcuts.json")
       @counter = 0
       @logon_time = {}
       @server = server
@@ -26,11 +27,13 @@ module Minecraft
       add_command(:rules, :ops => false, :all => false)
       add_command(:nom,   :ops => true,  :all => true, :all_message => "is providing noms to all.")
       add_command(:list,  :ops => false, :all => false)
+      add_command(:s,     :ops => false, :all => false)
       add_command(:uptime,     :ops => false, :all => false)
       add_command(:addtimer,   :ops => true,  :all => false)
       add_command(:deltimer,   :ops => true,  :all => false)
       add_command(:printtimer, :ops => true,  :all => false)
       add_command(:printtime,  :ops => true,  :all => false)
+      add_command(:shortcuts,  :ops => false, :all => false)
       add_command(:kitlist,    :ops => false, :all => false)
       add_command(:property,   :ops => true,  :all => false)
     end
@@ -43,8 +46,13 @@ module Minecraft
       end
     end
 
-    def save_timers
-      File.open("user_timers.json", "w") { |f| f.print @timers.to_json }
+    def save
+      save_file :timers
+      save_file :shortcuts
+    end
+
+    def save_file(var)
+      File.open("user_#{var}.json", "w") { |f| f.print instance_variable_get("@#{var}").to_json }
     end
 
     def write_log

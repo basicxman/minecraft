@@ -94,6 +94,26 @@ module Minecraft
       @server.puts "say Timer is at #{@counter}."
     end
 
+    def s(user, *args)
+      return @server.puts "say You need to specify a shortcut silly!" if args.length == 0
+
+      shortcut_name = args.slice! 0
+      if args.length == 0
+        @server.puts "say #{shortcut_name} is not a valid shortcut for #{user}." unless @shortcuts.has_key? user and @shortcuts[user].has_key? shortcut_name
+        return call_command(user, @shortcuts[user][shortcut_name].first, *@shortcuts[user][shortcut_name][1..-1]) if args.length == 0
+      end
+
+      command_string = args
+      @shortcuts[user] ||= {}
+      @shortcuts[user][shortcut_name] = command_string
+      @server.puts "say Shortcut labelled #{shortcut_name} for #{user} has been added."
+    end
+
+    def shortcuts(user, *args)
+      labels = @shortcuts[user].keys.join(", ") if @shortcuts.has_key? user
+      @server.puts "say Shortcuts for #{user}: #{labels}."
+    end
+
     def help(*args)
       @server.puts <<-eof
 say !tp target_user

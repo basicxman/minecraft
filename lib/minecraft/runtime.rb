@@ -15,10 +15,7 @@ module Minecraft
 
     def pre_checks
       Minecraft::Tools.download_minecraft if @opts.update?
-      if @opts.tempmobs?
-        puts "[+] Temporarily toggling mobs."
-        Minecraft::Tools.toggle_mobs
-      end
+      puts "[+] Temporarily toggling mobs.  Setting to #{Minecraft::Tools.toggle_mobs}." if @opts.tempmobs?
     end
   end
 end
