@@ -197,18 +197,19 @@ say !deltimer item
     end
 
     def quantify(value)
-      return value.scan(/[0-9]+[a-z]?/).inject(0) do |total, term|
+      quantity = value.scan(/[0-9]+[a-z]?/).inject(0) do |total, term|
         quantity, flag = term.match(/([0-9]+)([a-z]?)/)[1..2]
         quantity = quantity.to_i
         return total + quantity if flag.nil?
 
         total + case flag
-        when 'm' then [2560, quantity * 64].min
+        when 'm' then quantity * 64
         when 'd' then (64.0 / [1, quantity].max).round
         when 's' then [1, 64 - quantity].max
         else quantity
         end
       end
+      return [2560, quantity].min
     end
   end
 end
