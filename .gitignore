@@ -3,3 +3,6 @@ gem.sh
 .bundle
 Gemfile.lock
 pkg/*
+mc
+doc
+.yardoc

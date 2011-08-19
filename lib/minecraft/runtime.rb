@@ -1,5 +1,15 @@
 module Minecraft
+  # An instance of the Runtime class will spool up the server and do any
+  # preliminary work.
   class Runtime
+    # New Runtime instance.
+    #
+    # @param [Slop] opts Command line options from slop.
+    # @example
+    #   opts = Slop.parse do
+    #     ...
+    #   end
+    #   runtime = Runtime.new(opts)
     def initialize(opts)
       @opts = opts
       pre_checks
@@ -13,6 +23,8 @@ module Minecraft
       end
     end
 
+    # Checks if Minecraft needs to be updated, checks if mobs are to be
+    # toggled.
     def pre_checks
       Minecraft::Tools.download_minecraft if @opts.update?
       puts "[+] Temporarily toggling mobs.  Setting to #{Minecraft::Tools.toggle_mobs}." if @opts.tempmobs?

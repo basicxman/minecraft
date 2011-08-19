@@ -1,5 +1,7 @@
 module Minecraft
+  # Contains kit and item hashes takes care of buckets for items.
   module Data
+    # Item kits.
     KITS = {
       :diamond    => [276, 277, 278, 279, 293],
       :goldarmour => [314, 315, 316, 317],
@@ -10,6 +12,7 @@ module Minecraft
       :redstone   => [[331, 256], [356, 64], [69, 64], [77, 64], [70, 64]]
     }
 
+    # All item keys.
     DATA_VALUE_HASH = {
       "glass"                   => "20",
       "purple wool"             => "35",
@@ -248,6 +251,7 @@ module Minecraft
       "cocoa beans"             => "351"
     }
 
+    # Alphabetical buckets for quicker approximate matching.  Filled on init.
     ITEM_BUCKETS = {}
     DATA_VALUE_HASH.each_key do |key|
       bucket = key[0]

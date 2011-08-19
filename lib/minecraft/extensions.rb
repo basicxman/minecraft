@@ -1,7 +1,14 @@
 module Minecraft
+  # An Extensions instance is meant to process pipes from a Server instance and
+  # manage custom functionality additional to default Notchian Minecraft
+  # behaviour.
   class Extensions
     include Commands
 
+    # New Extensions instance.
+    #
+    # @param [IO] server The standard input pipe of the server process.
+    # @param [Slop] opts Command line options from Slop.
     def initialize(server, opts)
       @ops = File.readlines("ops.txt").map { |s| s.chomp }
       @userlog = get_json("user.log")
@@ -38,6 +45,7 @@ module Minecraft
       add_command(:property,   :ops => true,  :all => false)
     end
 
+    # Gets a hash from a JSON file (or a blank one).
     def get_json(file)
       if File.exists? file
         JSON.parse(File.read(file))
@@ -46,19 +54,42 @@ module Minecraft
       end
     end
 
+    # Save the user timers and shortcuts hash to a data file.
     def save
       save_file :timers
       save_file :shortcuts
     end
 
+    # Save an instance hash to it's associated data file.
+    #
+    # @param [Symbol] var
+    # @example
+    #   save_file :timers
     def save_file(var)
       File.open("user_#{var}.json", "w") { |f| f.print instance_variable_get("@#{var}").to_json }
     end
 
+    # Writes the user uptime log to disk.
     def write_log
       File.open("user.log", "w") { |f| f.print @userlog.to_json }
     end
 
+    # Complicated method to decide the logic of calling a command.  Checks
+    # if the command requires op privileges and whether an `all` version is
+    # available and has been requested.
+    #
+    # Figures out the root portion of the command, checks if a validation
+    # method is available, if so it will be executed.  Then checks if op
+    # privileges are required, any `all` version of the command requires
+    # ops as it affects all users.  The corresponding method will be called,
+    # if an `all` command is used it will call the corresponding method if
+    # available or loop through the base command for each connected user.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] command The requested command.
+    # @param args Arguments for the command.
+    # @example
+    #   call_command("basicxman", "give", "cobblestone", "64")
     def call_command(user, command, *args)
       is_all = command.to_s.end_with? "all"
       root   = command.to_s.chomp("all").to_sym
@@ -85,10 +116,20 @@ module Minecraft
       end
     end
 
+    # Add a command to the commands instance hash
+    #
+    # @param [Symbol] command The command to add.
+    # @option opts [Boolean] :all
+    #   Whether or not an all version of the command should be made available.
+    # @option opts [Boolean] :ops
+    #   Whether or not the base command requires ops.
+    # @option opts [String] :all_message
+    #   The message to print when the all version is used.
     def add_command(command, opts)
       @commands[command] = opts
     end
 
+    # Processes a line from the console.
     def process(line)
       puts line
       return info_command(line) if line.index "INFO"
@@ -98,6 +139,8 @@ module Minecraft
       puts e.backtrace
     end
 
+    # Checks if the server needs to be saved and prints the save-all command if
+    # so.
     def check_save
       if @savefreq.nil?
         freq = 30
@@ -109,6 +152,8 @@ module Minecraft
       @server.puts "save-all" if @counter % freq == 0
     end
 
+    # Increments the counter and checks if any timers are needed to be
+    # executed.
     def periodic
       @counter += 1
       check_save
@@ -121,6 +166,11 @@ module Minecraft
       end
     end
 
+    # Removes the meta data (timestamp, INFO) from the line and then executes a
+    # series of checks on the line.  Grabs the user and command from the line
+    # and then calls the call_command method.
+    #
+    # @param [String] line The line from the console.
     def info_command(line)
       line.gsub! /^.*?\[INFO\]\s+/, ''
       return if meta_check(line)
@@ -132,17 +182,26 @@ module Minecraft
       call_command(user, args.slice!(0).to_sym, *args)
     end
 
+    # Executes the meta checks (kick/ban, ops, join/disconnect) and returns true
+    # if any of them were used (and thus no further processing required).
+    #
+    # @param [String] line The passed line from the console.
     def meta_check(line)
       return true if check_kick_ban(line)
       return true if check_ops(line)
       return true if check_join_part(line)
     end
 
+    # Removes the specified user as from the connected players array.
+    #
+    # @param [String] user The specified user.
+    # @return [Boolean] Always returns true.
     def remove_user(user)
       @users.reject! { |u| u.downcase == user.downcase }
       return true
     end
 
+    # Check if a console line has informed us about a ban or kick.
     def check_kick_ban(line)
       user = line.split(" ").last
       if line.index "Banning"
@@ -152,6 +211,7 @@ module Minecraft
       end
     end
 
+    # Check if a console line has informed us about a [de-]op privilege change.
     def check_ops(line)
       user = line.split(" ").last
       if line.index "De-opping"
@@ -163,6 +223,7 @@ module Minecraft
       end
     end
 
+    # Check if a console line has informed us about a player [dis]connecting.
     def check_join_part(line)
       user = line.split(" ").first
       if line.index "lost connection"
@@ -176,6 +237,8 @@ module Minecraft
       end
     end
 
+    # If a command method is called and is not specified, take in the arguments
+    # here and attempt to !give the player the item.  Otherwise print an error.
     def method_missing(sym, *args)
       if DATA_VALUE_HASH.has_key? sym.downcase and is_op? args.first
         give(args.first, sym, args.last)
@@ -184,6 +247,8 @@ module Minecraft
       end
     end
 
+    # Calculate and print the time spent by a recently disconnected user.  Save
+    # the user uptime log.
     def log_time(user)
       time_spent = calculate_uptime(user)
       @userlog[user] ||= 0
@@ -192,27 +257,46 @@ module Minecraft
       write_log
     end
 
+    # Format an uptime for printing.  Should not be used for logging.
+    #
+    # @param [Integer] time Time difference in seconds.
+    # @return [Float] Returns the number of minutes rounded to two precision.
     def format_uptime(time)
       (time / 60.0).round(2)
     end
 
+    # Calculate a users current uptime.
+    #
+    # @param [String] user The specified user.
+    # @return [Integer] The uptime in seconds.
     def calculate_uptime(user)
       Time.now - @logon_time[user]
     end
 
+    # Check if a user has op privileges.
+    #
+    # @param [String] user The specified user.
+    # @return [Boolean]
     def is_op?(user)
       @ops.include? user.downcase
     end
 
+    # Check if a user is ops and print a privilege error if not.
+    #
+    # @param [String] user The specified user.
+    # @param [String] command The command they tried to use.
+    # @return [Boolean] Returns true if the user is an op.
     def validate_ops(user, command)
       return true if is_op? user
       @server.puts "say #{user} is not an op, cannot use !#{command}."
     end
 
+    # An error message for invalid commands.
     def invalid_command(command)
       @server.puts "say #{command} is invalid."
     end
 
+    # Load the server.properties file into a Ruby hash.
     def load_server_properties
       @server_properties = {}
       File.readlines("server.properties").each do |line|
@@ -222,6 +306,7 @@ module Minecraft
       end
     end
 
+    # Display a welcome message to a recently connected user.
     def display_welcome_message(user)
       @server.puts "say #{@welcome_message.gsub('%', user)}" unless @welcome_message.nil?
     end

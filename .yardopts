@@ -1,0 +1,5 @@
+--hide-void-return
+--title "Minecraft server wrapper and deployment solution."
+--readme README.md
+
+lib/**/*.rb
