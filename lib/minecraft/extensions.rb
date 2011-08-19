@@ -93,7 +93,7 @@ module Minecraft
     def call_command(user, command, *args)
       is_all = command.to_s.end_with? "all"
       root   = command.to_s.chomp("all").to_sym
-      return invalid_command(command) unless @commands.include? root
+      return send(root, user, *args) unless @commands.include? root
 
       # Any `all` suffixed command requires ops.
       if @commands[root][:ops] or (is_all and @commands[root][:all])
@@ -240,10 +240,12 @@ module Minecraft
     # If a command method is called and is not specified, take in the arguments
     # here and attempt to !give the player the item.  Otherwise print an error.
     def method_missing(sym, *args)
-      if DATA_VALUE_HASH.has_key? sym.downcase and is_op? args.first
-        give(args.first, sym, args.last)
+      item, quantity = items_arg(1, [sym.to_s.downcase, args.last])
+      item = resolve_item(item)
+      if item and is_op? args.first
+        give(args.first, item, quantity.to_s)
       else
-        puts "Invalid command given."
+        puts "#{item} is invalid."
       end
     end
 
