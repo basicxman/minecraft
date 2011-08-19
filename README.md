@@ -56,12 +56,6 @@ Please refer to `Minecraft::Extensions#initialize`.
 Development Path
 ----------------
 
-### Minor Release Milestone
-
-- Automated tests written
-- Documentation
-- Thorough testing
-
 ### Major Release Milestone
 
 - Complete test coverage
