@@ -11,10 +11,12 @@ module Minecraft
     # @param [Slop] opts Command line options from Slop.
     def initialize(server, opts)
       @ops = File.readlines("ops.txt").map { |s| s.chomp }
-      @userlog = get_json("user.log")
+      get_json :hops, []
+      get_json :uptime
+      get_json :timers
+      get_json :shortcuts
+      get_json :userlog
       @users = []
-      @timers = get_json("user_timers.json")
-      @shortcuts = get_json("user_shortcuts.json")
       @counter = 0
       @logon_time = {}
       @server = server
@@ -27,37 +29,42 @@ module Minecraft
 
       # Command set.
       @commands = {}
-      add_command(:give,  :ops => true,  :all => true, :all_message => "is putting out.")
-      add_command(:tp,    :ops => false, :all => true, :all_message => "is teleporting all users to their location.")
-      add_command(:kit,   :ops => true,  :all => true, :all_message => "is providing kits to all.")
-      add_command(:help,  :ops => false, :all => false)
-      add_command(:rules, :ops => false, :all => false)
-      add_command(:nom,   :ops => true,  :all => true, :all_message => "is providing noms to all.")
-      add_command(:list,  :ops => false, :all => false)
-      add_command(:s,     :ops => false, :all => false)
-      add_command(:uptime,     :ops => false, :all => false)
-      add_command(:addtimer,   :ops => true,  :all => false)
-      add_command(:deltimer,   :ops => true,  :all => false)
-      add_command(:printtimer, :ops => true,  :all => false)
-      add_command(:printtime,  :ops => true,  :all => false)
-      add_command(:shortcuts,  :ops => false, :all => false)
-      add_command(:kitlist,    :ops => false, :all => false)
-      add_command(:property,   :ops => true,  :all => false)
+      add_command(:give,       :ops => :hop,  :all => true, :all_message => "is putting out.")
+      add_command(:tp,         :ops => :hop,  :all => true, :all_message => "is teleporting all users to their location.")
+      add_command(:kit,        :ops => :hop,  :all => true, :all_message => "is providing kits to all.")
+      add_command(:kitlist,    :ops => :hop,  :all => false)
+      add_command(:help,       :ops => :none, :all => false)
+      add_command(:rules,      :ops => :none, :all => false)
+      add_command(:nom,        :ops => :hop,  :all => true, :all_message => "is providing noms to all.")
+      add_command(:list,       :ops => :none, :all => false)
+      add_command(:s,          :ops => :hop,  :all => false)
+      add_command(:shortcuts,  :ops => :hop,  :all => false)
+      add_command(:hop,        :ops => :op,   :all => false)
+      add_command(:dehop,      :ops => :op,   :all => false)
+      add_command(:uptime,     :ops => :none, :all => false)
+      add_command(:addtimer,   :ops => :hop,  :all => false)
+      add_command(:deltimer,   :ops => :hop,  :all => false)
+      add_command(:printtimer, :ops => :hop,  :all => false)
+      add_command(:printtime,  :ops => :op,   :all => false)
+      add_command(:property,   :ops => :op,   :all => false)
     end
 
-    # Gets a hash from a JSON file (or a blank one).
-    def get_json(file)
-      if File.exists? file
+    # Sets an instance variable with it's corresponding data file or a blank hash.
+    def get_json(var, blank = {})
+      file = "#{var}.json"
+      t = if File.exists? file
         JSON.parse(File.read(file))
       else
-        {}
+        blank
       end
+      instance_variable_set("@#{var}", t)
     end
 
     # Save the user timers and shortcuts hash to a data file.
     def save
       save_file :timers
       save_file :shortcuts
+      save_file :hops
     end
 
     # Save an instance hash to it's associated data file.
@@ -66,12 +73,7 @@ module Minecraft
     # @example
     #   save_file :timers
     def save_file(var)
-      File.open("user_#{var}.json", "w") { |f| f.print instance_variable_get("@#{var}").to_json }
-    end
-
-    # Writes the user uptime log to disk.
-    def write_log
-      File.open("user.log", "w") { |f| f.print @userlog.to_json }
+      File.open("#{var}.json", "w") { |f| f.print instance_variable_get("@#{var}").to_json }
     end
 
     # Complicated method to decide the logic of calling a command.  Checks
@@ -96,8 +98,10 @@ module Minecraft
       return send(root, user, *args) unless @commands.include? root
 
       # Any `all` suffixed command requires ops.
-      if @commands[root][:ops] or (is_all and @commands[root][:all])
-        return if !validate_ops(user, command)
+      if @commands[root][:ops] == :ops or (is_all and @commands[root][:all])
+        return unless validate_ops(user, command)
+      elsif @commands[root][:ops] == :hop
+        return unless validate_ops(user, command, false) or validate_hops(user, command)
       end
 
       if respond_to? "validate_" + root.to_s
@@ -149,7 +153,10 @@ module Minecraft
       else
         freq = @savefreq.to_i
       end
-      @server.puts "save-all" if @counter % freq == 0
+      if @counter % freq == 0
+        @server.puts "save-all"
+        save
+      end
     end
 
     # Increments the counter and checks if any timers are needed to be
@@ -256,7 +263,7 @@ module Minecraft
       @userlog[user] ||= 0
       @userlog[user] += time_spent
       @server.puts "say #{user} spent #{format_uptime(time_spent)} minutes in the server, totalling to #{format_uptime(@userlog[user])}."
-      write_log
+      save_file :userlog
     end
 
     # Format an uptime for printing.  Should not be used for logging.
@@ -272,7 +279,7 @@ module Minecraft
     # @param [String] user The specified user.
     # @return [Integer] The uptime in seconds.
     def calculate_uptime(user)
-      Time.now - @logon_time[user]
+      Time.now - (@logon_time[user] || 0)
     end
 
     # Check if a user has op privileges.
@@ -283,14 +290,32 @@ module Minecraft
       @ops.include? user.downcase
     end
 
-    # Check if a user is ops and print a privilege error if not.
+    # Check if a user has half op privileges.
+    #
+    # @param [String] user The specified user.
+    # @return [Boolean]
+    def is_hop?(user)
+      @hops.include? user.downcase
+    end
+
+    # Check if a user has op privileges and print a privilege error if not.
     #
     # @param [String] user The specified user.
     # @param [String] command The command they tried to use.
     # @return [Boolean] Returns true if the user is an op.
-    def validate_ops(user, command)
-      return true if is_op? user
-      @server.puts "say #{user} is not an op, cannot use !#{command}."
+    def validate_ops(user, command, message = true)
+      return true if is_op? user.downcase
+      @server.puts "say #{user} is not an op, cannot use !#{command}." if message
+    end
+
+    # Check if a user has half op privileges and print a privilege error if not.
+    #
+    # @param [String] user The specified user.
+    # @param [String] command The command they tried to use.
+    # @return [Boolean] Returns true if the user is an op.
+    def validate_hops(user, command, message = true)
+      return true if is_hop? user.downcase
+      @server.puts "say #{user} is not a half-op, cannot use !#{command}." if message
     end
 
     # An error message for invalid commands.

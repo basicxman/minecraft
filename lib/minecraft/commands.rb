@@ -4,6 +4,28 @@ module Minecraft
   module Commands
     include Data
 
+    # Gives half-op privileges to the target user.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] target_user The target user to be hop'ed.
+    # @example
+    #   hop("basicxman", "blizzard4U")
+    def hop(user, target_user)
+      @hops << target_user.downcase unless @hops.include? target_user.downcase
+      @server.puts "#{target_user} is now a hop, thanks #{user}!"
+    end
+
+    # De-half-ops the target user.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] target_user The target user to be de-hop'ed.
+    # @example
+    #   dehop("basicxman", "blizzard4U")
+    def dehop(user, target_user)
+      @hops.reject! { |u| u == target_user.downcase }
+      @server.puts "#{target_user} has been de-hoped, thanks #{user}!"
+    end
+
     # Give command takes an item name or numeric id and a quantifier.  If a
     # quantifier is not specified then the quantity defaults to 1.  Items will
     # try to resolved if they are not an exact match.
@@ -95,6 +117,15 @@ module Minecraft
     #   uptime("basicxman", "mike_n_7")
     def uptime(user, target_user = nil)
       target_user ||= user
+      unless @users.include? target_user
+        if @userlog.has_key? target_user
+          @server.puts "say #{target_user} has #{format_uptime(@userlog[target_user])} minutes of logged time."
+        else
+          @server.puts "say #{target_user} Does not exist."
+        end
+        return
+      end
+
       time_spent = calculate_uptime(target_user)
       if @userlog.has_key? target_user
         total = "  Out of a total of #{format_uptime(@userlog[target_user] + time_spent)} minutes."
@@ -118,13 +149,16 @@ module Minecraft
     #   list("basicxman")
     def list(user)
       l = @users.inject("") do |s, u|
+        pre, suf = "", ""
         if u == user
           pre = "["
           suf = "]"
         end
-        suf = "*" + (suf || "") if is_op? u
+        pre = pre + "@" if is_op? u
+        pre = pre + "%" if is_hop? u
         s + "#{", " unless s.empty?}#{pre}#{u}#{suf}"
       end
+
       @server.puts "say #{l}"
     end
 
