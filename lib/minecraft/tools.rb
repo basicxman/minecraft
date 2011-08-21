@@ -39,5 +39,17 @@ module Minecraft
       File.open("server.properties", "w") { |f| f.print content }
       return new_state
     end
+
+    def self.get_configuration_file
+      return {} unless File.exists? "minecraft.properties"
+      File.readlines("minecraft.properties").map { |l| l.split(" ") }.inject({}) do |hash, (key, *value)|
+        hash.merge({ key.to_sym => config_value(value) })
+      end
+    end
+
+    def self.config_value(value)
+      return true if value.nil? or value.length == 0
+      return value.join(" ")
+    end
   end
 end

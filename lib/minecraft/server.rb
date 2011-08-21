@@ -35,7 +35,7 @@ module Minecraft
     # An exit hook, checks if mobs need to be untoggled and saves the server.
     # Server is stopped gracefully.
     def minecraft_exit
-      puts "[+] Restoring previous mob state to #{Minecraft::Tools.toggle_mobs}." if @opts.tempmobs?
+      puts "[+] Restoring previous mob state to #{Minecraft::Tools.toggle_mobs}." if @opts[:tempmobs]
       puts "\n[+] Saving..."
       @extensions.save
       @threads.each(&:kill)
