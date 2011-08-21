@@ -8,6 +8,12 @@ require "fileutils"
 require "stringio"
 require "turn"
 
+module Minecraft
+  class Extensions
+    attr_accessor :commands, :users, :ops, :hops, :counter, :server, :kickvotes, :last_kick_vote, :uptime, :timers, :shortcuts, :userlog, :userpoints
+  end
+end
+
 class Test < MiniTest::Unit::TestCase
   def self.test(name, &block)
     define_method("test_#{name.gsub(/\W/, '_')}", block)

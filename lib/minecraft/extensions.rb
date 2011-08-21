@@ -16,7 +16,7 @@ module Minecraft
       get_json :timers
       get_json :shortcuts
       get_json :userlog
-      get_json :points
+      get_json :userpoints
       @users = []
       @counter = 0
       @logon_time = {}
@@ -82,7 +82,7 @@ module Minecraft
       save_file :timers
       save_file :shortcuts
       save_file :hops
-      save_file :points
+      save_file :userpoints
     end
 
     # Save an instance hash to it's associated data file.

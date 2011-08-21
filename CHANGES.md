@@ -2,7 +2,7 @@
 ------------------
 
 * Added configuration file capability.
-* Added `!points`, `!board`, `!kickvote`, `!vote`, `!cancelvote`, `!kickvotes`, `!roulette`, `change_time`, `!om`, `!dehop`, `!op`
+* Added `!points`, `!board`, `!kickvote`, `!vote`, `!cancelvote`, `!kickvotes`, `!roulette`, `change_time`, `!om`, `!dehop`, `!hop`
 * Added time changes (morning, night, dawn, etc...)
 * Separated half-op and op privileges.
 * `!property` now lists properties if none specified.

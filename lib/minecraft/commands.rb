@@ -14,10 +14,15 @@ module Minecraft
     #   points("basicxman", "mike_n_7")
     #   points("basicxman", "mike_n_7", "50")
     def points(user, target_user, num_points = 1)
+      if user.downcase == target_user.downcase
+        @server.puts "say Did you just try to give yourself points? Sure, minus twenty."
+        @userpoints[target_user] ||= 0
+        @userpoints[target_user] -= 20
+      end
       num_points = [num_points.to_i, cap_points(user)].min
-      @points[target_user] ||= 0
-      @points[target_user] += num_points
-      @server.puts "say #{user} has given #{target_user} #{num_points} points for a total of #{@points[target_user]}."
+      @userpoints[target_user] ||= 0
+      @userpoints[target_user] += num_points
+      @server.puts "say #{user} has given #{target_user} #{num_points} points for a total of #{@userpoints[target_user]}."
     end
 
     # Checks a users points or displays the leaderboard.
@@ -30,12 +35,12 @@ module Minecraft
     def board(user, target_user = nil)
       if target_user.nil?
         leaderboard = {}
-        @points.each do |u, p|
+        @userpoints.each do |u, p|
           leaderboard[p] ||= []
           leaderboard[p] << u
         end
         num_to_display = 5
-        leaderboard.keys.sort.each do |points|
+        leaderboard.keys.sort.reverse.each do |points|
           leaderboard[points].each do |u|
             return unless num_to_display >= 1
             @server.puts "say #{u}: #{points}"
@@ -43,8 +48,8 @@ module Minecraft
           end
         end
       else
-        if @points.has_key? target_user
-          @server.puts "say #{u}: #{@points[u]}"
+        if @userpoints.has_key? target_user
+          @server.puts "say #{u}: #{@userpoints[u]}"
         end
       end
     end

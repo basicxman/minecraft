@@ -1,13 +1,7 @@
 require "helper"
-require "minecraft"
-
-module Minecraft
-  class Extensions
-    attr_accessor :commands, :users, :ops, :hops, :counter, :server, :kickvotes, :last_kick_vote, :uptime, :timers, :shortcuts, :userlog, :points
-  end
-end
 
 class ExtensionsTest < Test
+  # call_comamnd testing.
   sandbox_test "should call a command for a regular user" do
     @ext = Minecraft::Extensions.new(StringIO.new, {})
     @ext.users = ["basicxman"]
