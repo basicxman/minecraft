@@ -1,4 +1,5 @@
 require "helper"
+require "minecraft"
 
 class ExtensionsTest < Test
   # call_comamnd testing.

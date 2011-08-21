@@ -32,38 +32,38 @@ module Minecraft
 
       # Command set.
       @commands = {}
-      add_command(:give,       :ops => :hop,  :all => true, :all_message => "is putting out.")
-      add_command(:tp,         :ops => :hop,  :all => true, :all_message => "is teleporting all users to their location.")
-      add_command(:kit,        :ops => :hop,  :all => true, :all_message => "is providing kits to all.")
-      add_command(:kitlist,    :ops => :hop,  :all => false)
-      add_command(:help,       :ops => :none, :all => false)
-      add_command(:rules,      :ops => :none, :all => false)
-      add_command(:nom,        :ops => :hop,  :all => true, :all_message => "is providing noms to all.")
-      add_command(:om,         :ops => :hop,  :all => true, :all_message => "is noming everybody, gross.")
-      add_command(:list,       :ops => :none, :all => false)
-      add_command(:s,          :ops => :hop,  :all => false)
-      add_command(:shortcuts,  :ops => :hop,  :all => false)
-      add_command(:hop,        :ops => :op,   :all => false)
-      add_command(:dehop,      :ops => :op,   :all => false)
-      add_command(:uptime,     :ops => :none, :all => false)
-      add_command(:addtimer,   :ops => :hop,  :all => false)
-      add_command(:deltimer,   :ops => :hop,  :all => false)
-      add_command(:printtimer, :ops => :hop,  :all => false)
-      add_command(:printtime,  :ops => :op,   :all => false)
-      add_command(:property,   :ops => :op,   :all => false)
-      add_command(:morning,    :ops => :op,   :all => false)
-      add_command(:evening,    :ops => :op,   :all => false)
-      add_command(:day,        :ops => :op,   :all => false)
-      add_command(:night,      :ops => :op,   :all => false)
-      add_command(:dawn,       :ops => :op,   :all => false)
-      add_command(:dusk,       :ops => :op,   :all => false)
-      add_command(:roulette,   :ops => :op,   :all => false)
-      add_command(:kickvote,   :ops => :none, :all => false)
-      add_command(:vote,       :ops => :none, :all => false)
-      add_command(:cancelvote, :ops => :op,   :all => false)
-      add_command(:kickvotes,  :ops => :op,   :all => false)
-      add_command(:points,     :ops => :none, :all => false)
-      add_command(:board,      :ops => :none, :all => false)
+      add_command :give,       :ops => :hop,  :all => true, :all_message => "is putting out."
+      add_command :tp,         :ops => :hop,  :all => true, :all_message => "is teleporting all users to their location."
+      add_command :kit,        :ops => :hop,  :all => true, :all_message => "is providing kits to all."
+      add_command :kitlist,    :ops => :hop,  :all => false
+      add_command :help,       :ops => :none, :all => false
+      add_command :rules,      :ops => :none, :all => false
+      add_command :nom,        :ops => :hop,  :all => true, :all_message => "is providing noms to all."
+      add_command :om,         :ops => :hop,  :all => true, :all_message => "is noming everybody, gross."
+      add_command :list,       :ops => :none, :all => false
+      add_command :s,          :ops => :hop,  :all => false
+      add_command :shortcuts,  :ops => :hop,  :all => false
+      add_command :hop,        :ops => :op,   :all => false
+      add_command :dehop,      :ops => :op,   :all => false
+      add_command :uptime,     :ops => :none, :all => false
+      add_command :addtimer,   :ops => :hop,  :all => false
+      add_command :deltimer,   :ops => :hop,  :all => false
+      add_command :printtimer, :ops => :hop,  :all => false
+      add_command :printtime,  :ops => :op,   :all => false
+      add_command :property,   :ops => :op,   :all => false
+      add_command :morning,    :ops => :op,   :all => false
+      add_command :evening,    :ops => :op,   :all => false
+      add_command :day,        :ops => :op,   :all => false
+      add_command :night,      :ops => :op,   :all => false
+      add_command :dawn,       :ops => :op,   :all => false
+      add_command :dusk,       :ops => :op,   :all => false
+      add_command :roulette,   :ops => :op,   :all => false
+      add_command :kickvote,   :ops => :none, :all => false
+      add_command :vote,       :ops => :none, :all => false
+      add_command :cancelvote, :ops => :op,   :all => false
+      add_command :kickvotes,  :ops => :op,   :all => false
+      add_command :points,     :ops => :none, :all => false
+      add_command :board,      :ops => :none, :all => false
     end
 
     # Sets an instance variable with it's corresponding data file or a blank hash.

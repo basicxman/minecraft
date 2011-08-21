@@ -3,6 +3,8 @@ require "minecraft"
 
 class CommandsTest < Test
   include Minecraft::Commands
+
+  # Item resolution and quantifiers testing.
   test "should properly check quantifiers" do
     assert is_quantifier? "1"
     assert is_quantifier? "10"
@@ -50,6 +52,7 @@ class CommandsTest < Test
     assert_nil resolve_item("asdf")
   end
 
+  # Give command testing.
   test "give command should give a single slot worth" do
     @server = StringIO.new
     give("foo", "cobblestone", "64")
@@ -78,6 +81,7 @@ eof
     assert_equal result, @server.string
   end
 
+  # User points system testing.
   sandbox_test "should give a user points" do
     @ext = Minecraft::Extensions.new(StringIO.new, {})
     @ext.users = ["basicxman", "mike_n_7", "blizzard4U", "Ian_zers"]
@@ -124,5 +128,103 @@ eof
     assert_match "Ian_zers", leaderboard[2]
     assert_match "horsmanjarrett", leaderboard[3]
     assert_match "blizzard4U", leaderboard[4]
+  end
+
+  # Kickvote testing.
+  sandbox_test "should initiate a kickvote against a user" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman", "mike_n_7", "blizzard4U", "Ian_zers"]
+    @ext.ops  = ["basicxman"]
+    @ext.hops = ["mike_n_7"]
+    @ext.call_command("basicxman", "kickvote", "blizzard4U")
+    assert_equal 3, @ext.kickvotes["blizzard4U"][:tally]
+    assert_equal "blizzard4U", @ext.last_kick_vote
+  end
+
+  sandbox_test "should expire a kickvote against a user" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman", "blizzard4U"]
+    @ext.call_command("basicxman", "kickvote", "blizzard4U")
+    @ext.counter = 9
+    @ext.kickvotes["blizzard4U"][:start] = Time.now - 300
+    @ext.periodic
+    assert_match "expire", @ext.server.string
+  end
+
+  sandbox_test "should add the correct number of votes per user type" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman", "mike_n_7", "blizzard4U", "Ian_zers"]
+    @ext.ops  = ["basicxman"]
+    @ext.hops = ["mike_n_7"]
+    @ext.vote_threshold = 7
+    @ext.call_command("Ian_zers", "kickvote", "blizzard4U")
+    assert_equal 1, @ext.kickvotes["blizzard4U"][:tally]
+    @ext.call_command("mike_n_7", "vote")
+    assert_equal 3, @ext.kickvotes["blizzard4U"][:tally]
+    @ext.call_command("basicxman", "vote")
+    assert_equal 6, @ext.kickvotes["blizzard4U"][:tally]
+  end
+
+  sandbox_test "should kick a user who has enough votes" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman", "mike_n_7", "blizzard4U", "Ian_zers"]
+    @ext.ops  = ["basicxman"]
+    @ext.hops = ["mike_n_7"]
+    @ext.call_command("basicxman", "kickvote", "Ian_zers")
+    @ext.call_command("mike_n_7", "vote")
+    assert_match "kick Ian_zers", @ext.server.string
+  end
+
+  # Time commands.
+  sandbox_test "should change time with time commands" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.ops = ["basicxman"]
+    %w( morning evening night dawn dusk day ).each do |time|
+      @ext.call_command("basicxman", time)
+      assert_match "time set #{Minecraft::Data::TIME[time.to_sym]}", @ext.server.string
+      @ext.server.string = ""
+    end
+  end
+
+  # Half op privileges and !list.
+  sandbox_test "should revoke and add half op privileges" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman", "blizzard4U", "mike_n_7"]
+    @ext.ops = ["basicxman"]
+    @ext.call_command("basicxman", "hop", "blizzard4U")
+    @ext.call_command("basicxman", "hop", "mike_n_7")
+    @ext.call_command("basicxman", "dehop", "blizzard4U")
+    @ext.call_command("basicxman", "list")
+    assert_match "[@basicxman], blizzard4U, %mike_n_7", @ext.server.string.split("\n").last
+  end
+
+  # Help command.
+  sandbox_test "should display help contents for regular users" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["blizzard4U"]
+    @ext.call_command("blizzard4U", "help")
+    assert_match "rules", @ext.server.string
+    assert_match "list", @ext.server.string
+    refute_match "give", @ext.server.string
+  end
+
+  sandbox_test "should display help contents for half ops" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["mike_n_7"]
+    @ext.hops  = ["mike_n_7"]
+    @ext.call_command("mike_n_7", "help")
+    assert_match "rules", @ext.server.string
+    assert_match "give", @ext.server.string
+    refute_match "morning", @ext.server.string
+  end
+
+  sandbox_test "should display help contents for ops" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman"]
+    @ext.ops   = ["basicxman"]
+    @ext.call_command("basicxman", "help")
+    assert_match "rules", @ext.server.string
+    assert_match "give", @ext.server.string
+    assert_match "morning", @ext.server.string
   end
 end

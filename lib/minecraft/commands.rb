@@ -180,7 +180,6 @@ module Minecraft
     # Checks to see if any kickvotes are expired.
     def expire_kickvotes
       @kickvotes.each do |target_user, data|
-        puts "Checking #{Time.now} against #{data[:start] + @vote_expiration}}"
         if Time.now > data[:start] + @vote_expiration
           @server.puts "say The kickvote for #{target_user} has expired."
           @kickvotes.delete(target_user)
@@ -476,20 +475,24 @@ module Minecraft
       @server.puts "say Shortcuts for #{user}: #{labels}."
     end
 
-    # Prints the help contents.
+    # Prints the available commands for the user.
     #
+    # @param [String] user The requesting user.
     # @example
-    #   help()
-    def help(*args)
-      @server.puts <<-eof
-say !tp target_user
-say !kit kit_name
-say !give item quantity
-say !nom
-say !list
-say !addtimer item frequency
-say !deltimer item
-      eof
+    #   help("basicxman")
+    def help(user)
+      commands = @commands.keys.inject([]) { |arr, key|
+        return arr if key == :help
+        priv = @commands[key][:ops]
+        if is_op? user
+          arr << key
+        elsif is_hop? user
+          priv == :op ? arr : arr << key
+        else
+          priv == :none ? arr << key : arr
+        end
+      }.map { |s| "!" + s.to_s }
+      @server.puts "say Commands: #{commands.join(", ")}"
     end
 
     # Prints the list of available kits to the connected players.
