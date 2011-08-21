@@ -12,6 +12,26 @@ module Minecraft
       :redstone   => [[331, 256], [356, 64], [69, 64], [77, 64], [70, 64]]
     }
 
+    # Values for time, 0 to 24000.  0 is dawn, 12000 is dusk.
+    TIME = {
+      :morning => 1000,
+      :evening => 13000,
+      :day     => 5000,
+      :night   => 16000,
+      :dawn    => 0,
+      :dusk    => 12000
+    }
+
+    # Quotes for each time of day.
+    TIME_QUOTES = {
+      :morning => "Anyone like a little toasted zombie?",
+      :evening => "Let them come.",
+      :day     => "",
+      :night   => "",
+      :dawn    => "What are you doing? Those wraiths are still out there.",
+      :dusk    => ""
+    }
+
     # All item keys.
     DATA_VALUE_HASH = {
       "glass"                   => "20",
@@ -117,6 +137,7 @@ module Minecraft
       "pink wool"               => "35",
       "brick block"             => "45",
       "lever"                   => "69",
+      "switch"                  => "69",
       "birch wood"              => "17",
       "gray wool"               => "35",
       "tnt"                     => "46",

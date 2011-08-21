@@ -36,6 +36,7 @@ module Minecraft
       add_command(:help,       :ops => :none, :all => false)
       add_command(:rules,      :ops => :none, :all => false)
       add_command(:nom,        :ops => :hop,  :all => true, :all_message => "is providing noms to all.")
+      add_command(:om,         :ops => :hop,  :all => true, :all_message => "is noming everybody, gross.")
       add_command(:list,       :ops => :none, :all => false)
       add_command(:s,          :ops => :hop,  :all => false)
       add_command(:shortcuts,  :ops => :hop,  :all => false)
@@ -47,6 +48,13 @@ module Minecraft
       add_command(:printtimer, :ops => :hop,  :all => false)
       add_command(:printtime,  :ops => :op,   :all => false)
       add_command(:property,   :ops => :op,   :all => false)
+      add_command(:morning,    :ops => :op,   :all => false)
+      add_command(:evening,    :ops => :op,   :all => false)
+      add_command(:day,        :ops => :op,   :all => false)
+      add_command(:night,      :ops => :op,   :all => false)
+      add_command(:dawn,       :ops => :op,   :all => false)
+      add_command(:dusk,       :ops => :op,   :all => false)
+      add_command(:roulette,   :ops => :op,   :all => false)
     end
 
     # Sets an instance variable with it's corresponding data file or a blank hash.
@@ -247,6 +255,7 @@ module Minecraft
     # If a command method is called and is not specified, take in the arguments
     # here and attempt to !give the player the item.  Otherwise print an error.
     def method_missing(sym, *args)
+      return if change_time(sym)
       item, quantity = items_arg(1, [sym.to_s.downcase, args.last])
       item = resolve_item(item)
       if item and is_op? args.first

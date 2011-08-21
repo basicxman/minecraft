@@ -4,6 +4,31 @@ module Minecraft
   module Commands
     include Data
 
+    # Kicks a random person, the requesting user has a higher cance of being
+    # picked.
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   roulette("basicxman")
+    def roulette(user)
+      users = @users + [user] * 3
+      picked_user = users[(rand * users.length).floor]
+      @server.puts "say #{user} has requested a roulette kick, s/he has a higher chance of being kicked."
+      @server.puts "kick #{picked_user}"
+    end
+
+    # Changes the time of day.
+    #
+    # @param [String] time The time of day to change it to.
+    # @example
+    #   change_time("morning")
+    def change_time(time)
+      return false unless TIME.include? time
+      @server.puts "time set #{TIME[time]}"
+      @server.puts "say #{TIME_QUOTES[time]}" unless TIME_QUOTES[time] == ""
+      return true
+    end
+
     # Gives half-op privileges to the target user.
     #
     # @param [String] user The requesting user.
@@ -96,6 +121,16 @@ module Minecraft
       @server.puts "give #{user} 322 1"
     end
 
+    # Gives multiple golden apples to the specified user.
+    #
+    # @param [String] user Target user.
+    # @param args noms!
+    # @example
+    #   om("basicxman", "nom", "nom", "nom")
+    def om(user, args)
+      args.length.times { nom(user) }
+    end
+
     # Outputs the current value of a server property.
     #
     # @param [String] user The requesting user.
@@ -103,7 +138,11 @@ module Minecraft
     # @example
     #   property("basicxman", "spawn-monsters")
     def property(user, key)
-      @server.puts "say #{key} is currently #{@server_properties[key]}" if @server_properties.include? key
+      if key.nil?
+        @server.puts "say Keys: #{@server_properties.keys.join(", ")}"
+      else
+        @server.puts "say #{key} is currently #{@server_properties[key]}" if @server_properties.include? key
+      end
     end
 
     # Checks the current uptime of the current or target user.  Prints their
