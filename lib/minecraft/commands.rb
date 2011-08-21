@@ -482,7 +482,6 @@ module Minecraft
     #   help("basicxman")
     def help(user)
       commands = @commands.keys.inject([]) { |arr, key|
-        return arr if key == :help
         priv = @commands[key][:ops]
         if is_op? user
           arr << key

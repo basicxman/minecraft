@@ -1,3 +1,11 @@
+0.2.1 (2011-08-22)
+------------------
+
+* Fixed `!points` and `!board`
+* Bugfix on `call_command`
+* Added more test suites.
+* A `!help` command suitable for new privilege system.
+
 0.2.0 (2011-08-21)
 ------------------
 
