@@ -44,7 +44,8 @@ Please refer to `Minecraft::Extensions#initialize`.
     !printtimer                   # Print timers of the user.
     !printtime                    # Print the current counter time.
     !list                         # List the connected users, notes ops.
-    !property                     # Check a server property (!property spawn-monsters).
+    !property <key>               # Check a server property by key.
+    !property                     # List server properties available.
     !s <label> <command>          # Associates a command to a shortcut label for the user.
     !s <label>                    # Runs the command with the associated label.
     !shortcuts                    # Lists the users shortcuts.
@@ -52,6 +53,23 @@ Please refer to `Minecraft::Extensions#initialize`.
     !uptime <user>                # Prints the uptime of the given user.
     !uptime                       # Prints the uptime of the current user.
     !help                         # Outputs the help contents.
+    !hop <user>                   # Give a user half-op privileges.
+    !dehop <user>                 # Remove a users half-op privileges.
+    !morning                      # Change time of day to morning.
+    !evening                      # Change time of day to evening.
+    !day                          # Change time of day to daytime.
+    !night                        # Change time of day to night.
+    !dawn                         # Change time of day to dawn.
+    !dusk                         # Change time of day to dusk.
+    !roulette                     # Kick a random person, person requesting has a higher chance.
+    !kickvote <user>              # Initiate or vote for a kickvote against a user.
+    !kickvote                     # Vote to kick the last initiated user.
+    !vote                         # Vote to kick the last initiated user.
+    !cancelvote <user>            # Cancel to kickvote on a user.
+    !points <user> <quantity>     # Give a user points.
+    !board <user>                 # Check a users points.
+    !board                        # View the leaderboard of points.
+    !om <noms>                    # Give golden apples equivalent to the number of noms.
 
 Development Path
 ----------------
