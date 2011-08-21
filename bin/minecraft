@@ -19,6 +19,7 @@ opts = Slop.parse :help => true do
   banner "Usage: minecraft [options]"
 
   option :n, :no_run,          "Don't run the Minecraft server instance."
+  option :no_colour,           "Don't have coloured output on the server side."
   option :u, :update,          "Download the latest version of the Minecraft server jarfile."
   option :s, :min_memory,      "Specify the minimum amount of memory to allocate.", :optional => true
   option :x, :max_memory,      "Specify the maximum amount of memory to allocate.", :optional => true

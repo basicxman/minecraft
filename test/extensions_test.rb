@@ -2,6 +2,25 @@ require "helper"
 require "minecraft"
 
 class ExtensionsTest < Test
+  # Coloured line testing.
+  sandbox_test "should colour server side lines properly" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    result = "\033[0;37m2011-08-21 13:45:13\033[0m [INFO] Starting minecraft server version Beta 1.7.3"
+    assert_equal result, @ext.colour("2011-08-21 13:45:13 [INFO] Starting minecraft server version Beta 1.7.3")
+
+    result = "\033[0;37m2011-08-21 13:45:28\033[0m [INFO] <\033[1;34mbasicxman\033[0m> \033[1;33m!list\033[0m"
+    assert_equal result, @ext.colour("2011-08-21 13:45:28 [INFO] <basicxman> !list")
+
+    result = "\033[0;37m2011-08-21 13:45:35\033[0m [INFO] <\033[1;34mbasicxman\033[0m> \033[1;33m!hop basicxman\033[0m"
+    assert_equal result, @ext.colour("2011-08-21 13:45:35 [INFO] <basicxman> !hop basicxman")
+
+    result = "\033[0;37m2011-08-21 14:03:10\033[0m [INFO] \033[1;30mbasicxman lost connection: disconnect.quitting\033[0m"
+    assert_equal result, @ext.colour("2011-08-21 14:03:10 [INFO] basicxman lost connection: disconnect.quitting")
+
+    result = "\033[0;37m2011-08-21 13:53:09\033[0m [INFO] \033[1;36mCONSOLE:\033[0m Forcing save.."
+    assert_equal result, @ext.colour("2011-08-21 13:53:09 [INFO] CONSOLE: Forcing save..")
+  end
+
   # call_comamnd testing.
   sandbox_test "should call a command for a regular user" do
     @ext = Minecraft::Extensions.new(StringIO.new, {})

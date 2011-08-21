@@ -154,12 +154,27 @@ module Minecraft
 
     # Processes a line from the console.
     def process(line)
-      puts line
+      puts colour(line.dup)
       return info_command(line) if line.index "INFO"
     rescue Exception => e
       puts "An error has occurred."
       puts e
       puts e.backtrace
+    end
+
+    # Colours a server side line
+    def colour(line)
+      return line if @no_colour
+      line.gsub!(/^([0-9\-]{10}\s[0-9:]{8})/) { |m| "\033[0;37m#{$1}\033[0m" }
+      if line.index "lost connection" or line.index "logged in"
+        line.gsub!(/(\[INFO\]\s)(.*)/) { |m| "#{$1}\033[1;30m#{$2}\033[0m" }
+      elsif line.index "[INFO] CONSOLE:"
+        line.gsub!("CONSOLE:", "\033[1;36mCONSOLE:\033[0m")
+      else
+        line.gsub!(/(\[INFO\]\s+\<)(.*?)(\>)/) { |m| "#{$1}\033[1;34m#{$2}\033[0m#{$3}" }
+        line.gsub!(/(\>\s+)(!.*?)$/) { |m| "#{$1}\033[1;33m#{$2}\033[0m" }
+      end
+      return line
     end
 
     # Checks if the server needs to be saved and prints the save-all command if
