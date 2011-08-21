@@ -4,6 +4,128 @@ module Minecraft
   module Commands
     include Data
 
+    # Initiates or votes for a specific user to be kicked, since half-ops and
+    # regular connected players cannot kick users they can initiate a vote
+    # instead.
+    #
+    # @params [String] user The requesting user.
+    # @params [String] target_user The target user to be kicked if the vote
+    # succeeds.
+    # @example
+    #   kickvote("basicxman", "blizzard4U")
+    #   kickvote("basicxman")
+    def kickvote(user, target_user = nil)
+      return @server.puts "say No user #{target_user} exists." unless @users.include? target_user
+      return vote(user) if target_user.nil?
+      unless submit_vote(user, target_user)
+        @kickvotes[target_user] = {
+          :tally => kick_influence(user),
+          :votes => [user],
+          :start => Time.now
+        }
+        @last_kick_vote = target_user
+        @server.puts "say A kickvote has been initiated for #{target_user}."
+        @server.puts "say To vote enter !kickvote #{target_user}."
+      end
+    end
+
+    # Votes for the last initiated kickvote.
+    #
+    # @params [String] user The requesting user.
+    # @example
+    #   vote("basicxman")
+    def vote(user)
+      unless submit_vote(user, @last_kick_vote)
+        @server.puts "say No kickvote was initiated, dummy."
+      end
+    end
+
+    # Cancels a kickvote initiation for a specific user.
+    #
+    # @params [String] user The requesting user.
+    # @params [String] target_user The user which currently has a kickvote.
+    # @example
+    #   cancelvote("basicxman", "blizzard4U")
+    def cancelvote(user, target_user)
+      if @kickvotes.has_key? target_user
+        @kickvotes.delete(target_user)
+        @server.puts "say #{user} has cancelled the kickvote on #{target_user}."
+      else
+        @server.puts "say There is no kickvote against #{target_user} dummy."
+      end
+    end
+
+    # Displays all current kickvote initiations.
+    #
+    # @params [String] user The requesting user.
+    # @example
+    #   kickvotes("basicxman")
+    def kickvotes(user)
+      @kickvotes.each do |target_user, data|
+        @server.puts "say #{target_user}: #{data[:tally]} #{data[:votes].map { |u| u[0] + u[-1] }.join(", ")}"
+      end
+    end
+
+    # Submits a kickvote.
+    #
+    # @params [String] user The requesting user who is voting.
+    # @params [String] target_user The user being voted against.
+    # @return [Boolean] Returns true if the kickvote has been initiated yet.
+    # @example
+    #   submit_vote("basicxman", "blizzard4U")
+    def submit_vote(user, target_user)
+      return unless @users.include? target_user
+      if @kickvotes.has_key? target_user
+        if @kickvotes[target_user][:votes].include? user
+          @server.puts "say You have already voted."
+        else
+          @kickvotes[target_user][:votes] << user
+          @kickvotes[target_user][:tally] += kick_influence(user)
+          check_kickvote(target_user)
+        end
+        return true
+      else
+        return false
+      end
+    end
+
+    # Checks a kickvote entry to see if the tally number has crossed the
+    # threshold, if so, kicks the user.
+    #
+    # @param [String] user The specified user.
+    # @example
+    #   check_kickvote("blizzard4U")
+    def check_kickvote(user)
+      if @kickvotes[user][:tally] >= @vote_threshold
+        @server.puts "say Enough votes have been given to kick #{user}."
+        @server.puts "kick #{user}"
+        @kickvotes.delete(user)
+      end
+    end
+
+    # Computes the influence a user has for kickvotes.
+    #
+    # @param [String] user The specified user.
+    # @return [Integer] The influence level.
+    # @example
+    #   kick_influence("basicxman")
+    def kick_influence(user)
+      return 3 if is_op? user
+      return 2 if is_hop? user
+      return 1
+    end
+
+    # Checks to see if any kickvotes are expired.
+    def expire_kickvotes
+      @kickvotes.each do |target_user, data|
+        puts "Checking #{Time.now} against #{data[:start] + @vote_expiration}}"
+        if Time.now > data[:start] + @vote_expiration
+          @server.puts "say The kickvote for #{target_user} has expired."
+          @kickvotes.delete(target_user)
+        end
+      end
+    end
+
     # Kicks a random person, the requesting user has a higher cance of being
     # picked.
     #
@@ -12,7 +134,7 @@ module Minecraft
     #   roulette("basicxman")
     def roulette(user)
       users = @users + [user] * 3
-      picked_user = users[(rand * users.length).floor]
+      picked_user = users.sample
       @server.puts "say #{user} has requested a roulette kick, s/he has a higher chance of being kicked."
       @server.puts "kick #{picked_user}"
     end
@@ -127,7 +249,7 @@ module Minecraft
     # @param args noms!
     # @example
     #   om("basicxman", "nom", "nom", "nom")
-    def om(user, args)
+    def om(user, *args)
       args.length.times { nom(user) }
     end
 
@@ -137,9 +259,12 @@ module Minecraft
     # @param [String] key The server property requested.
     # @example
     #   property("basicxman", "spawn-monsters")
-    def property(user, key)
+    #   property("basicxman")
+    def property(user, key = nil)
       if key.nil?
-        @server.puts "say Keys: #{@server_properties.keys.join(", ")}"
+        (@server_properties.length / 3.0).ceil.times do |n|
+          @server.puts "say #{@server_properties.keys[n * 3, 3].join(", ")}"
+        end
       else
         @server.puts "say #{key} is currently #{@server_properties[key]}" if @server_properties.include? key
       end

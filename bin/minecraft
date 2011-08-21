@@ -6,15 +6,17 @@ require "minecraft"
 opts = Slop.parse :help => true do
   banner "Usage: minecraft [options]"
 
-  on :n, :no_run,     "Don't run the Minecraft server instance."
-  on :u, :update,     "Download the latest version of the Minecraft server jarfile."
-  on :s, :min_memory, "Specify the minimum amount of memory to allocate.", :optional => true
-  on :x, :max_memory, "Specify the maximum amount of memory to allocate.", :optional => true
-  on :no_auto_save,   "Disable auto save."
-  on :m, :tempmobs,   "Temporarily toggles mobs."
-  on :r, :rules,      "Specify the server rules.", :optional => true
-  on :f, :savefreq,   "Specify the frequency in seconds to save the server.", :optional => true
+  on :n, :no_run,          "Don't run the Minecraft server instance."
+  on :u, :update,          "Download the latest version of the Minecraft server jarfile."
+  on :s, :min_memory,      "Specify the minimum amount of memory to allocate.", :optional => true
+  on :x, :max_memory,      "Specify the maximum amount of memory to allocate.", :optional => true
+  on :no_auto_save,        "Disable auto save."
+  on :m, :tempmobs,        "Temporarily toggles mobs."
+  on :r, :rules,           "Specify the server rules.", :optional => true
+  on :f, :savefreq,        "Specify the frequency in seconds to save the server.", :optional => true
   on :w, :welcome_message, "Specfiy a welcome message to connecting users.", :optional => true
+  on :vote_threshold,      "Specify the threshold of votes to kick somebody.", :optional => true
+  on :vote_expiration,     "Specify the expiration time in seconds for kickvotes to expire.", :optional => true
 end
 
 runtime = Minecraft::Runtime.new(opts)

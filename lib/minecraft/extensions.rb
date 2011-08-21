@@ -20,12 +20,14 @@ module Minecraft
       @counter = 0
       @logon_time = {}
       @server = server
+      @kickvotes = {}
+      @last_kick_vote = nil
       load_server_properties
 
-      opts = {
-        :rules => "No rules specified."
-      }.merge(opts)
-      opts.each { |k, v| instance_variable_set("@#{k}", v) }
+      opts.to_hash.each { |k, v| instance_variable_set("@#{k}", v) }
+      @vote_expiration ||= 300
+      @vote_threshold  ||= 5
+      @rules           ||= "No rules specified."
 
       # Command set.
       @commands = {}
@@ -55,6 +57,10 @@ module Minecraft
       add_command(:dawn,       :ops => :op,   :all => false)
       add_command(:dusk,       :ops => :op,   :all => false)
       add_command(:roulette,   :ops => :op,   :all => false)
+      add_command(:kickvote,   :ops => :none, :all => false)
+      add_command(:vote,       :ops => :none, :all => false)
+      add_command(:cancelvote, :ops => :op,   :all => false)
+      add_command(:kickvotes,  :ops => :op,   :all => false)
     end
 
     # Sets an instance variable with it's corresponding data file or a blank hash.
@@ -156,7 +162,7 @@ module Minecraft
     def check_save
       if @savefreq.nil?
         freq = 30
-      elsif @savefreq == 0
+      elsif @savefreq == "0"
         return
       else
         freq = @savefreq.to_i
@@ -172,6 +178,7 @@ module Minecraft
     def periodic
       @counter += 1
       check_save
+      expire_kickvotes if @counter % 10 == 0
       @users.each do |user|
         next unless @timers.has_key? user
         @timers[user].each do |item, duration|
