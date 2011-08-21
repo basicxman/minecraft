@@ -116,7 +116,7 @@ module Minecraft
       return send(root, user, *args) unless @commands.include? root
 
       # Any `all` suffixed command requires ops.
-      if @commands[root][:ops] == :ops or (is_all and @commands[root][:all])
+      if @commands[root][:ops] == :op or (is_all and @commands[root][:all])
         return unless validate_ops(user, command)
       elsif @commands[root][:ops] == :hop
         return unless validate_ops(user, command, false) or validate_hops(user, command)

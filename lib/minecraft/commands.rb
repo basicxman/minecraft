@@ -7,9 +7,9 @@ module Minecraft
     # Gives a user a specific amount of points, the quantity is capped
     # depending on the privileges of the user.
     #
-    # @params [String] user The requesting user.
-    # @params [String] target_user The target user to give points to.
-    # @params [Integer] points Quantity of points to give.
+    # @param [String] user The requesting user.
+    # @param [String] target_user The target user to give points to.
+    # @param [Integer] points Quantity of points to give.
     # @example
     #   points("basicxman", "mike_n_7")
     #   points("basicxman", "mike_n_7", "50")
@@ -22,8 +22,8 @@ module Minecraft
 
     # Checks a users points or displays the leaderboard.
     #
-    # @params [String] user The requesting user.
-    # @params [String] target_user The user to check points of.
+    # @param [String] user The requesting user.
+    # @param [String] target_user The user to check points of.
     # @example
     #   board("basicxman")
     #   board("basicxman", "mike_n_7")
@@ -65,8 +65,8 @@ module Minecraft
     # regular connected players cannot kick users they can initiate a vote
     # instead.
     #
-    # @params [String] user The requesting user.
-    # @params [String] target_user The target user to be kicked if the vote
+    # @param [String] user The requesting user.
+    # @param [String] target_user The target user to be kicked if the vote
     # succeeds.
     # @example
     #   kickvote("basicxman", "blizzard4U")
@@ -88,7 +88,7 @@ module Minecraft
 
     # Votes for the last initiated kickvote.
     #
-    # @params [String] user The requesting user.
+    # @param [String] user The requesting user.
     # @example
     #   vote("basicxman")
     def vote(user)
@@ -99,8 +99,8 @@ module Minecraft
 
     # Cancels a kickvote initiation for a specific user.
     #
-    # @params [String] user The requesting user.
-    # @params [String] target_user The user which currently has a kickvote.
+    # @param [String] user The requesting user.
+    # @param [String] target_user The user which currently has a kickvote.
     # @example
     #   cancelvote("basicxman", "blizzard4U")
     def cancelvote(user, target_user)
@@ -114,7 +114,7 @@ module Minecraft
 
     # Displays all current kickvote initiations.
     #
-    # @params [String] user The requesting user.
+    # @param [String] user The requesting user.
     # @example
     #   kickvotes("basicxman")
     def kickvotes(user)
@@ -125,8 +125,8 @@ module Minecraft
 
     # Submits a kickvote.
     #
-    # @params [String] user The requesting user who is voting.
-    # @params [String] target_user The user being voted against.
+    # @param [String] user The requesting user who is voting.
+    # @param [String] target_user The user being voted against.
     # @return [Boolean] Returns true if the kickvote has been initiated yet.
     # @example
     #   submit_vote("basicxman", "blizzard4U")
