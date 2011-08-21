@@ -4,6 +4,63 @@ module Minecraft
   module Commands
     include Data
 
+    # Gives a user a specific amount of points, the quantity is capped
+    # depending on the privileges of the user.
+    #
+    # @params [String] user The requesting user.
+    # @params [String] target_user The target user to give points to.
+    # @params [Integer] points Quantity of points to give.
+    # @example
+    #   points("basicxman", "mike_n_7")
+    #   points("basicxman", "mike_n_7", "50")
+    def points(user, target_user, num_points = 1)
+      num_points = [num_points.to_i, cap_points(user)].min
+      @points[target_user] ||= 0
+      @points[target_user] += num_points
+      @server.puts "say #{user} has given #{target_user} #{num_points} points for a total of #{@points[target_user]}."
+    end
+
+    # Checks a users points or displays the leaderboard.
+    #
+    # @params [String] user The requesting user.
+    # @params [String] target_user The user to check points of.
+    # @example
+    #   board("basicxman")
+    #   board("basicxman", "mike_n_7")
+    def board(user, target_user = nil)
+      if target_user.nil?
+        leaderboard = {}
+        @points.each do |u, p|
+          leaderboard[p] ||= []
+          leaderboard[p] << u
+        end
+        num_to_display = 5
+        leaderboard.keys.sort.each do |points|
+          leaderboard[points].each do |u|
+            return unless num_to_display >= 1
+            @server.puts "say #{u}: #{points}"
+            num_to_display -= 1
+          end
+        end
+      else
+        if @points.has_key? target_user
+          @server.puts "say #{u}: #{@points[u]}"
+        end
+      end
+    end
+
+    # Caps the quantity of points able to be given based on requesting user.
+    #
+    # @param [String] user The requesting user.
+    # @return [Integer] Maximum quantity of points.
+    # @example
+    #   cap_points("basicxman")
+    def cap_points(user)
+      return 1000 if is_op? user
+      return 500  if is_hop? user
+      return 1
+    end
+
     # Initiates or votes for a specific user to be kicked, since half-ops and
     # regular connected players cannot kick users they can initiate a vote
     # instead.

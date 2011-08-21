@@ -16,6 +16,7 @@ module Minecraft
       get_json :timers
       get_json :shortcuts
       get_json :userlog
+      get_json :points
       @users = []
       @counter = 0
       @logon_time = {}
@@ -61,6 +62,8 @@ module Minecraft
       add_command(:vote,       :ops => :none, :all => false)
       add_command(:cancelvote, :ops => :op,   :all => false)
       add_command(:kickvotes,  :ops => :op,   :all => false)
+      add_command(:points,     :ops => :none, :all => false)
+      add_command(:board,      :ops => :none, :all => false)
     end
 
     # Sets an instance variable with it's corresponding data file or a blank hash.
@@ -79,6 +82,7 @@ module Minecraft
       save_file :timers
       save_file :shortcuts
       save_file :hops
+      save_file :points
     end
 
     # Save an instance hash to it's associated data file.
