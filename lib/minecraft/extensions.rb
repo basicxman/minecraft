@@ -122,6 +122,7 @@ module Minecraft
         return unless send("validate_" + root.to_s, *args)
       end
 
+      is_all = @commands[root][:all] if is_all
       if is_all
         @server.puts "say #{user} #{@commands[root][:all_message]}"
         if respond_to? command
