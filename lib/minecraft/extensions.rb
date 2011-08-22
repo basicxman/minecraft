@@ -17,6 +17,7 @@ module Minecraft
       get_json :shortcuts
       get_json :userlog
       get_json :userpoints
+      get_json :userdnd, []
       @users = []
       @counter = 0
       @logon_time = {}
@@ -64,6 +65,9 @@ module Minecraft
       add_command :kickvotes,  :ops => :op,   :all => false
       add_command :points,     :ops => :none, :all => false
       add_command :board,      :ops => :none, :all => false
+      add_command :dnd,        :ops => :none, :all => false
+      add_command :disturb,    :ops => :op,   :all => false
+      add_command :printdnd,   :ops => :op,   :all => false
     end
 
     # Sets an instance variable with it's corresponding data file or a blank hash.
@@ -83,6 +87,7 @@ module Minecraft
       save_file :shortcuts
       save_file :hops
       save_file :userpoints
+      save_file :userdnd
     end
 
     # Save an instance hash to it's associated data file.
@@ -132,7 +137,7 @@ module Minecraft
         if respond_to? command
           send(command, user, *args)
         else
-          @users.each { |u| send(root, u, *args) }
+          @users.each { |u| send(root, u, *args) unless @userdnd.include? u.downcase }
         end
       else
         send(root, user, *args)

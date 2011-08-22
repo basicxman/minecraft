@@ -4,6 +4,59 @@ module Minecraft
   module Commands
     include Data
 
+    # Stops users from disturbing you.
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   dnd("basicxman")
+    def dnd(user)
+      user.downcase!
+      if @userdnd.include? user
+        @server.puts "say #{user} is ready to be disturbed. *cough*"
+        @userdnd.reject! { |u| u == user }
+      else
+        @server.puts "say #{user} does not wish to be disturbed."
+        @userdnd << user
+      end
+    end
+
+    # Removes somebody from the DND list.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] target_user The target user.
+    # @example
+    #   disturb("basicxman", "mike_n_7")
+    def disturb(user, target_user)
+      @server.puts "say #{target_user} is being disturbed by #{user}!"
+      @userdnd.reject! { |u| u == target_user.downcase }
+    end
+
+    # Prints the users who do not wish to be disturbed.
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   printdnd("basicxman")
+    def printdnd(user)
+      @server.puts "say #{@userdnd.join(", ")}"
+    end
+
+    # Checks if the user does not wish to be disturbed and prints an error
+    # notice if so.
+    #
+    # @param [String] user The requesting user.
+    # @return [Boolean] Returns true if the user does not wish to be disturbed
+    # (should cancel action).
+    # @example
+    #   check_dnd("basicxman")
+    def check_dnd(user)
+      if @userdnd.include? user.downcase
+        @server.puts "say #{user} does not wish to be disturbed, don't be a jerk!"
+        return true
+      else
+        return false
+      end
+    end
+
     # Gives a user a specific amount of points, the quantity is capped
     # depending on the privileges of the user.
     #
@@ -14,12 +67,20 @@ module Minecraft
     #   points("basicxman", "mike_n_7")
     #   points("basicxman", "mike_n_7", "50")
     def points(user, target_user, num_points = 1)
-      if user.downcase == target_user.downcase
+      target_user = target_user.downcase
+      num_points = num_points.to_i
+      if user.downcase == target_user
         @server.puts "say Did you just try to give yourself points? Sure, minus twenty."
         @userpoints[target_user] ||= 0
         @userpoints[target_user] -= 20
+        return
+      elsif num_points < 0
+        @server.puts "say Subtracting points? For shame."
+        @userpoints[user] ||= 0
+        @userpoints[user] -= num_points
+        return
       end
-      num_points = [num_points.to_i, cap_points(user)].min
+      num_points = [num_points, cap_points(user)].min
       @userpoints[target_user] ||= 0
       @userpoints[target_user] += num_points
       @server.puts "say #{user} has given #{target_user} #{num_points} points for a total of #{@userpoints[target_user]}."
@@ -283,6 +344,7 @@ module Minecraft
     # @example
     #   tp("basicxman", "mike_n_7")
     def tp(user, target)
+      return if check_dnd(target)
       @server.puts "tp #{user} #{target}"
     end
 
@@ -290,9 +352,9 @@ module Minecraft
     #
     # @param [String] user Current (target) user.
     # @example
-    #   tp("basicxman")
+    #   tpall("basicxman")
     def tpall(user, *args)
-      @users.each { |u| tp(u, user) }
+      @users.each { |u| tp(u, user) unless @userdnd.include? u.downcase }
     end
 
     # Gives a golden apple to the specified user.
@@ -491,7 +553,18 @@ module Minecraft
           priv == :none ? arr << key : arr
         end
       }.map { |s| "!" + s.to_s }
-      @server.puts "say Commands: #{commands.join(", ")}"
+      temp_length = 0
+      buf = []
+      commands.each do |command|
+        temp_length += command.length + 2
+        if temp_length > 60
+          @server.puts "#{buf.join(", ")}"
+          buf = []
+          temp_length = 0
+        else
+          buf << command
+        end
+      end
     end
 
     # Prints the list of available kits to the connected players.

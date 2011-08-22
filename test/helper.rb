@@ -10,7 +10,7 @@ require "turn"
 
 module Minecraft
   class Extensions
-    attr_accessor :commands, :users, :ops, :hops, :counter, :server, :kickvotes, :last_kick_vote, :uptime, :timers, :shortcuts, :userlog, :userpoints, :vote_threshold
+    attr_accessor :commands, :users, :ops, :hops, :counter, :server, :kickvotes, :last_kick_vote, :uptime, :timers, :shortcuts, :userlog, :userpoints, :vote_threshold, :userdnd
   end
 end
 

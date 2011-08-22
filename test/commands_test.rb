@@ -88,11 +88,11 @@ eof
     @ext.ops  = ["basicxman"]
     @ext.hops = ["mike_n_7"]
     @ext.call_command("basicxman", "points", "Ian_zers", "1001")
-    assert_equal 1000, @ext.userpoints["Ian_zers"]
+    assert_equal 1000, @ext.userpoints["ian_zers"]
     @ext.call_command("mike_n_7", "points", "Ian_zers", "501")
-    assert_equal 1500, @ext.userpoints["Ian_zers"]
+    assert_equal 1500, @ext.userpoints["ian_zers"]
     @ext.call_command("blizzard4U", "points", "Ian_zers", "2")
-    assert_equal 1501, @ext.userpoints["Ian_zers"]
+    assert_equal 1501, @ext.userpoints["ian_zers"]
   end
 
   sandbox_test "should not a let a user give herself points" do
@@ -203,9 +203,10 @@ eof
     @ext = Minecraft::Extensions.new(StringIO.new, {})
     @ext.users = ["blizzard4U"]
     @ext.call_command("blizzard4U", "help")
-    assert_match "rules", @ext.server.string
-    assert_match "list", @ext.server.string
-    refute_match "give", @ext.server.string
+    t = @ext.server.string.gsub("\n", " ")
+    assert_match "rules", t
+    assert_match "list", t
+    refute_match "give", t
   end
 
   sandbox_test "should display help contents for half ops" do
@@ -213,9 +214,10 @@ eof
     @ext.users = ["mike_n_7"]
     @ext.hops  = ["mike_n_7"]
     @ext.call_command("mike_n_7", "help")
-    assert_match "rules", @ext.server.string
-    assert_match "give", @ext.server.string
-    refute_match "morning", @ext.server.string
+    t = @ext.server.string.gsub("\n", " ")
+    assert_match "rules", t
+    assert_match "give", t
+    refute_match "morning", t
   end
 
   sandbox_test "should display help contents for ops" do
@@ -223,8 +225,33 @@ eof
     @ext.users = ["basicxman"]
     @ext.ops   = ["basicxman"]
     @ext.call_command("basicxman", "help")
-    assert_match "rules", @ext.server.string
-    assert_match "give", @ext.server.string
-    assert_match "morning", @ext.server.string
+    t = @ext.server.string.gsub("\n", " ")
+    assert_match "rules", t
+    assert_match "give", t
+    assert_match "morning", t
+  end
+
+  # Do not disturb testing.
+  sandbox_test "should not allow users in dnd to be teleported to" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman", "mike_n_7"]
+    @ext.hops = ["mike_n_7"]
+    @ext.call_command("basicxman", "dnd")
+    assert_equal ["basicxman"], @ext.userdnd
+    @ext.server.string = ""
+    @ext.call_command("mike_n_7", "tp", "basicxman")
+    assert_match "disturbed", @ext.server.string
+    @ext.call_command("basicxman", "dnd")
+    assert_equal [], @ext.userdnd
+  end
+
+  sandbox_test "should allow ops to use the disturb command against users" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman", "mike_n_7"]
+    @ext.ops   = ["basicxman"]
+    @ext.call_command("mike_n_7", "dnd")
+    assert_equal ["mike_n_7"], @ext.userdnd
+    @ext.call_command("basicxman", "disturb", "mike_n_7")
+    assert_equal [], @ext.userdnd
   end
 end
