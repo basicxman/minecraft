@@ -254,4 +254,17 @@ eof
     @ext.call_command("basicxman", "disturb", "mike_n_7")
     assert_equal [], @ext.userdnd
   end
+
+  # Disco.
+  sandbox_test "should start the disco" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman"]
+    @ext.ops = ["basicxman"]
+    @ext.call_command("basicxman", "disco")
+    assert_match "disco", @ext.server.string
+    @ext.server.string = ""
+    12.times { @ext.periodic }
+    assert_match "time set 0", @ext.server.string
+    assert_match "time set 16000", @ext.server.string
+  end
 end

@@ -68,6 +68,7 @@ module Minecraft
       add_command :dnd,        :ops => :none, :all => false
       add_command :disturb,    :ops => :op,   :all => false
       add_command :printdnd,   :ops => :op,   :all => false
+      add_command :disco,      :ops => :op,   :all => false
     end
 
     # Sets an instance variable with it's corresponding data file or a blank hash.
@@ -204,6 +205,13 @@ module Minecraft
       @counter += 1
       check_save
       expire_kickvotes if @counter % 10 == 0
+      if @disco
+        if @counter % 2 == 0
+          @server.puts "time set 0"
+        else
+          @server.puts "time set 16000"
+        end
+      end
       @users.each do |user|
         next unless @timers.has_key? user
         @timers[user].each do |item, duration|

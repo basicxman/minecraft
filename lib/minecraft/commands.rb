@@ -4,6 +4,22 @@ module Minecraft
   module Commands
     include Data
 
+    # Disco!
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   disco("basicxman")
+    def disco(user)
+      @disco ||= false
+      if @disco
+        @server.puts "say Disco ends."
+        @disco = false
+      else
+        @server.puts "say #{user} has requested disco, s/he likely can't actually dance."
+        @disco = true
+      end
+    end
+
     # Stops users from disturbing you.
     #
     # @param [String] user The requesting user.
