@@ -175,6 +175,19 @@ eof
     assert_match "kick Ian_zers", @ext.server.string
   end
 
+  # Stop timer test.
+  sandbox_test "should stop all timers" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman"]
+    @ext.hops = ["basicxman"]
+    @ext.call_command("basicxman", "addtimer", "cobblestone")
+    @ext.call_command("basicxman", "addtimer", "arrow")
+    @ext.server.string = ""
+    @ext.call_command("basicxman", "stop")
+    assert_nil @ext.timers["basicxman"]
+    assert_match "stopped", @ext.server.string
+  end
+
   # Time commands.
   sandbox_test "should change time with time commands" do
     @ext = Minecraft::Extensions.new(StringIO.new, {})

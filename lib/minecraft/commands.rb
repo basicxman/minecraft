@@ -4,6 +4,17 @@ module Minecraft
   module Commands
     include Data
 
+    # Stops all timers for a user.
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   stop("basicxman")
+    # @note ops: hop
+    def stop(user)
+      @timers.delete user
+      @server.puts "say #{user} has stopped all his/her timers."
+    end
+
     # Changes or appends to the welcome message.  Use !welcome + foo to add foo.
     #
     # @param [String] user The requesting user.
