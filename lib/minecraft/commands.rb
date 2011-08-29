@@ -47,6 +47,17 @@ module Minecraft
       @server.puts "say Memo for #{target_user} added. Will be printed next time s/he logs in."
     end
 
+    # Stops all timers for a user.
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   stop("basicxman")
+    # @note ops: hop
+    def stop(user)
+      @timers.delete user
+      @server.puts "say #{user} has stopped all his/her timers."
+    end
+
     # Changes or appends to the welcome message.  Use !welcome + foo to add foo.
     #
     # @param [String] user The requesting user.
