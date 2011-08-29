@@ -4,6 +4,25 @@ module Minecraft
   module Commands
     include Data
 
+    # Adds a memo for the specified user.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] target_user The target user.
+    # @param args The memo.
+    # @example
+    #   memo("basicxman", "mike_n_7", "Hi!")
+    # @note ops: none
+    def memo(user, target_user, *args)
+      target_user = target_user.downcase
+      if @memos.has_key? target_user and @memos[target_user].length == 5
+        return @server.puts "say #{target_user} has too many memos already!"
+      end
+
+      @memos[target_user] ||= []
+      @memos[target_user] << [user, args.join(" ")]
+      @server.puts "say Memo for #{target_user} added. Will be printed next time s/he logs in."
+    end
+
     # Changes or appends to the welcome message.  Use !welcome + foo to add foo.
     #
     # @param [String] user The requesting user.

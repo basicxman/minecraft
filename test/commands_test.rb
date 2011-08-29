@@ -298,6 +298,35 @@ eof
     assert_match "basicxman", @ext.server.string
   end
 
+  # Memos.
+  sandbox_test "should allow users to set memos" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman"]
+    @ext.call_command("basicxman", "memo", "mike_n_7", "Hi")
+    assert_equal ["basicxman", "Hi"], @ext.memos["mike_n_7"][0]
+
+    #@ext.check_memos("mike_n_7")
+    #assert_match "Hi", @ext.server.string
+    #assert_equal 0, @ext.memos["mike_n_7"].length
+  end
+
+  sandbox_test "should add and print multiple memos" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman"]
+    3.times { @ext.call_command("basicxman", "memo", "mike_n_7", "Hi") }
+    assert_equal 3, @ext.memos["mike_n_7"].length
+
+    @ext.check_memos("mike_n_7")
+    assert_equal 0, @ext.memos["mike_n_7"].length
+  end
+
+  sandbox_test "should only allow five memos per user" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman"]
+    10.times { @ext.call_command("basicxman", "memo", "mike_n_7", "Hi") }
+    assert_equal 5, @ext.memos["mike_n_7"].length
+  end
+
   # Remaining commands testing (should test to ensure no errors are thrown in
   # the command execution).
   sandbox_test "should run commands without failure" do

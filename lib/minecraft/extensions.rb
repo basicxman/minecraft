@@ -19,6 +19,7 @@ module Minecraft
       get_json :userlog
       get_json :userpoints
       get_json :userdnd, []
+      get_json :memos
       @users = []
       @counter = 0
       @logon_time = {}
@@ -104,6 +105,7 @@ module Minecraft
       save_file :hops
       save_file :userpoints
       save_file :userdnd
+      save_file :memos
     end
 
     # Save an instance hash to it's associated data file.
@@ -259,6 +261,22 @@ module Minecraft
       end
     end
 
+    # Checks the available memos for a uesr who has just logged in, prints any
+    # that are found.
+    #
+    # @param [String] user The user to check.
+    # @example
+    #   check_memos("mike_n_7")
+    def check_memos(user)
+      user = user.downcase
+      return unless @memos.has_key? user
+
+      @memos[user].each do |m|
+        @server.puts "say Message from: #{m.first} - #{m.last}"
+      end
+      @memos[user] = []
+    end
+
     # Removes the meta data (timestamp, INFO) from the line and then executes a
     # series of checks on the line.  Grabs the user and command from the line
     # and then calls the call_command method.
@@ -329,6 +347,7 @@ module Minecraft
       elsif line.index "logged in"
         @users << user
         display_welcome_message(user)
+        check_memos(user)
         @logon_time[user] = Time.now
         return true
       end
