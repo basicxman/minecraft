@@ -527,7 +527,7 @@ module Minecraft
     # @example
     #   shortcuts("basicxman")
     # @note ops: hop
-    def shortcuts(user, *args)
+    def shortcuts(users)
       labels = @shortcuts[user].keys.join(", ") if @shortcuts.has_key? user
       @server.puts "say Shortcuts for #{user}: #{labels}."
     end

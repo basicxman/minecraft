@@ -31,7 +31,7 @@ module Minecraft
       @vote_threshold  ||= 5
       @rules           ||= "No rules specified."
 
-      # Command set.
+      # Initialize the set of commands.
       @commands = {}
       commands = Minecraft::Commands.public_instance_methods
       @command_info = File.read(method(commands.first).source_location.first).split("\n")
@@ -39,32 +39,50 @@ module Minecraft
       commands.each do |sym|
         next if sym.to_s.end_with? "all"
         meth  = method(sym)
-        src_e = meth.source_location.last - 2
-        src_b = (0..src_e - 1).to_a.reverse.detect(src_e - 1) { |n| not @command_info[n] =~ /^\s+#/ } + 1
+        src_b, src_e = get_comment_range(meth.source_location.last)
+
         @commands[sym] = {
           :help => "",
           :ops => :none,
           :params => meth.parameters
         }
-        help_done = false
-        (src_b..src_e).each do |n|
-          line = @command_info[n].strip[2..-1]
-          if line.nil?
-            help_done = true
-            next
-          end
+        parse_comments(src_b, src_e, sym)
+      end
+    end
 
-          unless help_done
-            @commands[sym][:help] += " " unless @commands[sym][:help].empty?
-            @commands[sym][:help] += line
-          end
+    # Parses the comments for a given command method between the two given line
+    # numbers.  Places the results in the commands instance hash.
+    #
+    # @params [Integer] src_b Beginning comment line.
+    # @params [Integer] src_e Ending comment line.
+    # @params [Symbol] sym Method symbol.
+    # @example
+    #   parse_comments(6, 13, :disco)
+    def parse_comments(src_b, src_e, sym)
+      help_done = false
+      (src_b..src_e).each do |n|
+        line = @command_info[n].strip[2..-1]
+        if line.nil?
+          help_done = true
+          next
+        elsif !help_done
+          @commands[sym][:help] += " " unless @commands[sym][:help].empty?
+          @commands[sym][:help] += line
+        end
 
-          if line.index("@note") == 0
-            key, value = line[6..-1].split(": ")
-            @commands[sym][key.to_sym] = @enums.include?(key.to_sym) ? value.to_sym : value
-          end
+        if line.index("@note") == 0
+          key, value = line[6..-1].split(": ")
+          @commands[sym][key.to_sym] = @enums.include?(key.to_sym) ? value.to_sym : value
         end
       end
+    end
+
+    # Gets the line number bounds for the comments corresponding with a method
+    # on a given line number.
+    def get_comment_range(line_number)
+      src_e = line_number - 2
+      src_b = (0..src_e - 1).to_a.reverse.detect(src_e - 1) { |n| not @command_info[n] =~ /^\s+#/ } + 1
+      [src_b, src_e]
     end
 
     # Sets an instance variable with it's corresponding data file or a blank hash.
@@ -129,6 +147,12 @@ module Minecraft
       end
 
       is_all = @commands[root][:all] if is_all
+      rest_param = @commands[root][:params].count { |a| a.first == :rest }
+      reg_params = @commands[root][:params].count { |a| a.last != :user }
+
+      # Remove excess parameters.
+      args = args[0...reg_params] if args.length > reg_params and rest_param == 0
+
       args = [user] + args unless @commands[root][:params].length == 0
       if is_all
         @server.puts "say #{user} #{@commands[root][:all]}"
@@ -140,19 +164,36 @@ module Minecraft
       else
         send(root, *args)
       end
+    rescue Exception => e
+      validate_command_entry(rest_param, reg_params, user, command, *args)
+      $stderr.puts "An error has occurred during a call command operation.\n#{e}"
+      $stderr.puts e.backtrace
     end
 
-    # Add a command to the commands instance hash
+    # After an exception is caught this method should be called to find and
+    # print errors with the arguments specified to the command.
     #
-    # @param [Symbol] command The command to add.
-    # @option opts [Boolean] :all
-    #   Whether or not an all version of the command should be made available.
-    # @option opts [Boolean] :ops
-    #   Whether or not the base command requires ops.
-    # @option opts [String] :all_message
-    #   The message to print when the all version is used.
-    def add_command(command, opts)
-      @commands[command] = opts
+    # @param [String] user The requesting user.
+    # @param [String] command The requested command.
+    # @param args Arguments for the command.
+    # @example
+    #   call_command("basicxman", "give")
+    def validate_command_entry(rest_param, reg_params, user, command, *args)
+      args.slice! 0 if args.first == user
+      params = @commands[command.to_sym][:params][1..-1].map { |a| [a[0], a[1].to_s.gsub("_", " ")] }
+      return unless args.length < reg_params
+
+      return @server.puts "say Expected at least one argument." if rest_param == 1
+      req_params = params.count { |a| a.first == :req }
+      if args.length < req_params
+        args.length.times { params.slice! 0 }
+        if params.length == 1
+          return @server.puts "say Expected the argument '#{params[0][1]}'"
+        else
+          temp = params.map { |a| "'#{a[1]}'" }
+          return @server.pust "say Expected additional arguments, #{temp.join(", ")}"
+        end
+      end
     end
 
     # Processes a line from the console.
@@ -160,9 +201,8 @@ module Minecraft
       puts colour(line.dup)
       return info_command(line) if line.index "INFO"
     rescue Exception => e
-      puts "An error has occurred."
-      puts e
-      puts e.backtrace
+      $stderr.puts "An error has occurred during line processing.\n#{e}"
+      $stderr.puts e.backtrace
     end
 
     # Colours a server side line

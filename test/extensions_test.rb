@@ -80,4 +80,33 @@ class ExtensionsTest < Test
     @ext.call_command("basicxman", "morning")
     refute_match "not a", @ext.server.string
   end
+
+  sandbox_test "should remove excess arguments" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.call_command("basicxman", "help", "foo", "bar")
+    refute_empty @ext.server.string
+
+    @ext.call_command("basicxman", "day", "foo")
+    refute_empty @ext.server.string
+  end
+
+  # Command valiation testing.
+  sandbox_test "should print an arguments error if not enough arguments are given" do
+    ts, $stderr = $stderr, StringIO.new
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.ops = ["basicxman"]
+    @ext.call_command("basicxman", "give")
+    assert_match "at least one argument", @ext.server.string
+    @ext.server.string = ""
+
+    @ext.call_command("basicxman", "kit")
+    assert_match "Expected", @ext.server.string
+    assert_match "group", @ext.server.string
+    @ext.server.string = ""
+
+    @ext.call_command("basicxman", "hop")
+    assert_match "Expected", @ext.server.string
+    assert_match "target user", @ext.server.string
+    $stderr = ts
+  end
 end

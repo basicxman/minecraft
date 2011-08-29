@@ -285,4 +285,48 @@ eof
     assert_match "blizzard4U", @ext.server.string
     assert_match "Ian_zers", @ext.server.string
   end
+
+  # Remaining commands testing (should test to ensure no errors are thrown in
+  # the command execution).
+  sandbox_test "should run commands without failure" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman", "mike_n_7", "blizzard4U", "Ian_zers"]
+    @ext.ops   = ["basicxman"]
+    @ext.hops  = ["mike_n_7"]
+    @ext.call_command("basicxman", "dawn")
+    @ext.call_command("basicxman", "dusk")
+    @ext.call_command("basicxman", "day")
+    @ext.call_command("basicxman", "night")
+    @ext.call_command("basicxman", "morning")
+    @ext.call_command("basicxman", "evening")
+    @ext.call_command("basicxman", "disco")
+    @ext.call_command("mike_n_7", "dnd")
+    @ext.call_command("basicxman", "printdnd")
+    @ext.call_command("basicxman", "disturb", "mike_n_7")
+    @ext.call_command("basicxman", "roulette")
+    @ext.call_command("basicxman", "hop", "Ian_zers")
+    @ext.call_command("basicxman", "dehop", "Ian_zers")
+    @ext.call_command("basicxman", "kit", "diamond")
+    @ext.call_command("basicxman", "tp", "Ian_zers")
+    @ext.call_command("basicxman", "tpall")
+    @ext.call_command("basicxman", "nom")
+    @ext.call_command("basicxman", "om", "nom", "nom")
+    @ext.call_command("basicxman", "property", "spawn-monsters")
+    @ext.call_command("basicxman", "property")
+    @ext.call_command("basicxman", "uptime")
+    @ext.call_command("basicxman", "uptime", "mike_n_7")
+    @ext.call_command("basicxman", "rules")
+    @ext.call_command("basicxman", "list")
+    @ext.call_command("basicxman", "addtimer", "cobblestone")
+    @ext.call_command("basicxman", "addtimer", "4", "60")
+    @ext.call_command("basicxman", "deltimer", "4")
+    @ext.call_command("basicxman", "printtimer")
+    @ext.call_command("basicxman", "printtime")
+    @ext.call_command("basicxman", "s", "foo", "give", "cobblestone")
+    @ext.call_command("basicxman", "s", "foo")
+    @ext.call_command("basicxman", "shortcuts")
+    @ext.call_command("basicxman", "help")
+    @ext.call_command("basicxman", "help", "give")
+    @ext.call_command("basicxman", "kitlist")
+  end
 end
