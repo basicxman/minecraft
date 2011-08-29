@@ -4,6 +4,30 @@ module Minecraft
   module Commands
     include Data
 
+    # Allows a user to specify a periodic (once every minute) time change.
+    #
+    # @param [String] user The requesting user.
+    # @param [Integer] time_change Amount of time to add (can be negative or
+    # positive) each second.
+    # @example
+    #   warptime("basicxman", "5")
+    #   warptime("basicxman")
+    # @note ops: op
+    def warptime(user, time_change = nil)
+      if time_change.nil?
+        return @server.puts "say Current rate: #{@time_change} every ten seconds." if @time_change
+        return @server.puts "say No custom rate specified."
+      end
+
+      time_change = time_change.to_i
+      if time_change < 0
+        @time_change = [-1000, time_change].max
+      else
+        @time_change = [1000, time_change].min
+      end
+      @server.puts "say New rate: #{@time_change} every ten seconds."
+    end
+
     # Adds a memo for the specified user.
     #
     # @param [String] user The requesting user.

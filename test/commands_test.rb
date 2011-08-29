@@ -327,6 +327,15 @@ eof
     assert_equal 5, @ext.memos["mike_n_7"].length
   end
 
+  # Warping time.
+  sandbox_test "should warp time" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.ops = ["basicxman"]
+    @ext.call_command("basicxman", "warptime", "100")
+    40.times { @ext.periodic }
+    assert_match "time add 100", @ext.server.string.gsub("\n", " ")
+  end
+
   # Remaining commands testing (should test to ensure no errors are thrown in
   # the command execution).
   sandbox_test "should run commands without failure" do

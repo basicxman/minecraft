@@ -40,6 +40,9 @@ module Minecraft
       return new_state
     end
 
+    # Grabs the extension configuration file and parses it.
+    #
+    # @return [Hash] Configuration hash.
     def self.get_configuration_file
       return {} unless File.exists? "minecraft.properties"
       File.readlines("minecraft.properties").map { |l| l.split(" ") }.inject({}) do |hash, (key, *value)|
@@ -47,6 +50,12 @@ module Minecraft
       end
     end
 
+    # Parses a value (or set of) from a configuration file.
+    #
+    # @param [String] An array of values.
+    # @return [String] The string value joined together.
+    # @return [Boolean] Will return a boolean true if the value is blank (meant
+    # to be a boolean configuration flag).
     def self.config_value(value)
       return true if value.nil? or value.length == 0
       return value.join(" ")

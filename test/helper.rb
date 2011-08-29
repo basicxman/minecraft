@@ -15,10 +15,13 @@ module Minecraft
 end
 
 class Test < MiniTest::Unit::TestCase
+  # Standard test.
   def self.test(name, &block)
     define_method("test_#{name.gsub(/\W/, '_')}", block)
   end
 
+  # Sandbox test which creates a sandboxed environment for a mocked Minecraft
+  # server to run in.
   def self.sandbox_test(name, &block)
     p = Proc.new do
       FileUtils.mkdir("mc") unless File.exists? "mc"

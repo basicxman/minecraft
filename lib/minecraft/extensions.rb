@@ -55,9 +55,9 @@ module Minecraft
     # Parses the comments for a given command method between the two given line
     # numbers.  Places the results in the commands instance hash.
     #
-    # @params [Integer] src_b Beginning comment line.
-    # @params [Integer] src_e Ending comment line.
-    # @params [Symbol] sym Method symbol.
+    # @param [Integer] src_b Beginning comment line.
+    # @param [Integer] src_e Ending comment line.
+    # @param [Symbol] sym Method symbol.
     # @example
     #   parse_comments(6, 13, :disco)
     def parse_comments(src_b, src_e, sym)
@@ -244,7 +244,6 @@ module Minecraft
     def periodic
       @counter += 1
       check_save
-      expire_kickvotes if @counter % 10 == 0
       if @disco
         if @counter % 2 == 0
           @server.puts "time set 0"
@@ -252,6 +251,14 @@ module Minecraft
           @server.puts "time set 16000"
         end
       end
+
+      if @counter % 10 == 0
+        expire_kickvotes
+        if @time_change and @time_change != 0
+          @server.puts "time add #{@time_change}"
+        end
+      end
+
       @users.each do |user|
         next unless @timers.has_key? user
         @timers[user].each do |item, duration|
