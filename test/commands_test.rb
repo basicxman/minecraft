@@ -231,6 +231,13 @@ eof
     assert_match "morning", t
   end
 
+  sandbox_test "should display help contents for a specific command" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman"]
+    @ext.call_command("basicxman", "help", "hop")
+    assert_match "privileges to the target user", @ext.server.string
+  end
+
   # Do not disturb testing.
   sandbox_test "should not allow users in dnd to be teleported to" do
     @ext = Minecraft::Extensions.new(StringIO.new, {})

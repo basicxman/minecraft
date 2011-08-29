@@ -538,7 +538,14 @@ module Minecraft
     # @example
     #   help("basicxman")
     # @note ops: none
-    def help(user)
+    def help(user, command = nil)
+      unless command.nil?
+        return @server.puts "say #{command} does not exist." unless @commands.has_key? command.to_sym
+        @server.puts "say !#{command}"
+        @server.puts "say #{@commands[command.to_sym][:help]}"
+        return
+      end
+
       commands = @commands.keys.inject([]) { |arr, key|
         priv = @commands[key][:ops]
         if is_op? user
@@ -554,14 +561,14 @@ module Minecraft
       commands.each do |command|
         temp_length += command.length + 2
         if temp_length > 60
-          @server.puts "#{buf.join(", ")}"
+          @server.puts "say #{buf.join(", ")}"
           buf = [command]
           temp_length = command.length
         else
           buf << command
         end
       end
-      @server.puts "#{buf.join(", ")}" unless buf.empty?
+      @server.puts "say #{buf.join(", ")}" unless buf.empty?
     end
 
     # Prints the list of available kits to the connected players.
