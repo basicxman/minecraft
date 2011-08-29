@@ -4,11 +4,66 @@ module Minecraft
   module Commands
     include Data
 
-    # Disco!
+    # Changes to dawn.
+    #
+    # @example
+    #   dawn()
+    # @note ops: op
+    def dawn()
+      change_time(:dawn)
+    end
+
+    # Changes to dusk.
+    #
+    # @example
+    #   dusk()
+    # @note ops: op
+    def dusk()
+      change_time(:dusk)
+    end
+
+    # Changes to day.
+    #
+    # @example
+    #   day()
+    # @note ops: op
+    def day()
+      change_time(:day)
+    end
+
+    # Changes to night.
+    #
+    # @example
+    #   night()
+    # @note ops: op
+    def night()
+      change_time(:night)
+    end
+
+    # Changes to morning.
+    #
+    # @example
+    #   morning()
+    # @note ops: op
+    def morning()
+      change_time(:morning)
+    end
+
+    # Changes to evening.
+    #
+    # @example
+    #   evening()
+    # @note ops: op
+    def evening()
+      change_time(:evening)
+    end
+
+    # Toggles disco.
     #
     # @param [String] user The requesting user.
     # @example
     #   disco("basicxman")
+    # @note ops: op
     def disco(user)
       @disco ||= false
       if @disco
@@ -25,6 +80,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   dnd("basicxman")
+    # @note ops: none
     def dnd(user)
       user.downcase!
       if @userdnd.include? user
@@ -42,6 +98,7 @@ module Minecraft
     # @param [String] target_user The target user.
     # @example
     #   disturb("basicxman", "mike_n_7")
+    # @note ops: op
     def disturb(user, target_user)
       @server.puts "say #{target_user} is being disturbed by #{user}!"
       @userdnd.reject! { |u| u == target_user.downcase }
@@ -51,26 +108,10 @@ module Minecraft
     #
     # @param [String] user The requesting user.
     # @example
-    #   printdnd("basicxman")
-    def printdnd(user)
+    #   printdnd()
+    # @note: ops: op
+    def printdnd()
       @server.puts "say #{@userdnd.join(", ")}"
-    end
-
-    # Checks if the user does not wish to be disturbed and prints an error
-    # notice if so.
-    #
-    # @param [String] user The requesting user.
-    # @return [Boolean] Returns true if the user does not wish to be disturbed
-    # (should cancel action).
-    # @example
-    #   check_dnd("basicxman")
-    def check_dnd(user)
-      if @userdnd.include? user.downcase
-        @server.puts "say #{user} does not wish to be disturbed, don't be a jerk!"
-        return true
-      else
-        return false
-      end
     end
 
     # Gives a user a specific amount of points, the quantity is capped
@@ -82,6 +123,7 @@ module Minecraft
     # @example
     #   points("basicxman", "mike_n_7")
     #   points("basicxman", "mike_n_7", "50")
+    # @note ops: none
     def points(user, target_user, num_points = 1)
       target_user = target_user.downcase
       num_points = num_points.to_i
@@ -109,6 +151,7 @@ module Minecraft
     # @example
     #   board("basicxman")
     #   board("basicxman", "mike_n_7")
+    # @note ops: none
     def board(user, target_user = nil)
       if target_user.nil?
         leaderboard = {}
@@ -131,18 +174,6 @@ module Minecraft
       end
     end
 
-    # Caps the quantity of points able to be given based on requesting user.
-    #
-    # @param [String] user The requesting user.
-    # @return [Integer] Maximum quantity of points.
-    # @example
-    #   cap_points("basicxman")
-    def cap_points(user)
-      return 1000 if is_op? user
-      return 500  if is_hop? user
-      return 1
-    end
-
     # Initiates or votes for a specific user to be kicked, since half-ops and
     # regular connected players cannot kick users they can initiate a vote
     # instead.
@@ -153,6 +184,7 @@ module Minecraft
     # @example
     #   kickvote("basicxman", "blizzard4U")
     #   kickvote("basicxman")
+    # @note ops: none
     def kickvote(user, target_user = nil)
       return @server.puts "say No user #{target_user} exists." unless @users.include? target_user
       return vote(user) if target_user.nil?
@@ -173,6 +205,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   vote("basicxman")
+    # @note ops: none
     def vote(user)
       unless submit_vote(user, @last_kick_vote)
         @server.puts "say No kickvote was initiated, dummy."
@@ -185,6 +218,7 @@ module Minecraft
     # @param [String] target_user The user which currently has a kickvote.
     # @example
     #   cancelvote("basicxman", "blizzard4U")
+    # @note ops: op
     def cancelvote(user, target_user)
       if @kickvotes.has_key? target_user
         @kickvotes.delete(target_user)
@@ -199,33 +233,383 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   kickvotes("basicxman")
+    # @note ops: op
     def kickvotes(user)
       @kickvotes.each do |target_user, data|
         @server.puts "say #{target_user}: #{data[:tally]} #{data[:votes].map { |u| u[0] + u[-1] }.join(", ")}"
       end
     end
 
-    # Submits a kickvote.
+    # Kicks a random person, the requesting user has a higher cance of being
+    # picked.
     #
-    # @param [String] user The requesting user who is voting.
-    # @param [String] target_user The user being voted against.
-    # @return [Boolean] Returns true if the kickvote has been initiated yet.
+    # @param [String] user The requesting user.
     # @example
-    #   submit_vote("basicxman", "blizzard4U")
-    def submit_vote(user, target_user)
-      return unless @users.include? target_user
-      if @kickvotes.has_key? target_user
-        if @kickvotes[target_user][:votes].include? user
-          @server.puts "say You have already voted."
+    #   roulette("basicxman")
+    # @note ops: op
+    def roulette(user)
+      users = @users + [user] * 3
+      picked_user = users.sample
+      @server.puts "say #{user} has requested a roulette kick, s/he has a higher chance of being kicked."
+      @server.puts "kick #{picked_user}"
+    end
+
+    # Gives half-op privileges to the target user.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] target_user The target user to be hop'ed.
+    # @example
+    #   hop("basicxman", "blizzard4U")
+    # @note ops: op
+    def hop(user, target_user)
+      @hops << target_user.downcase unless @hops.include? target_user.downcase
+      @server.puts "#{target_user} is now a hop, thanks #{user}!"
+    end
+
+    # De-half-ops the target user.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] target_user The target user to be de-hop'ed.
+    # @example
+    #   dehop("basicxman", "blizzard4U")
+    # @note ops: op
+    def dehop(user, target_user)
+      @hops.reject! { |u| u == target_user.downcase }
+      @server.puts "#{target_user} has been de-hoped, thanks #{user}!"
+    end
+
+    # Give command takes an item name or numeric id and a quantifier.  If a
+    # quantifier is not specified then the quantity defaults to 1.  Items will
+    # try to resolved if they are not an exact match.
+    #
+    # @param [String] user Target user of the command.
+    # @example
+    #   give("basicxman", "cobblestone")
+    #   give("basicxman", "cobblestone", "9m")
+    #   give("basicxman", "flint", "and", "steel", "1")
+    #   give("basicxman", "4")
+    # @note ops: hop
+    # @note all: is putting out.
+    def give(user, *args)
+      item, quantity = items_arg(1, args)
+      item = resolve_item(item)
+
+      construct_give(user, item, quantity)
+    end
+
+    # Kit command takes a group name and gives the contents of the kit to the
+    # target user.
+    #
+    # @param [String] user Target user of the command.
+    # @param [String] group Label of the kit.
+    # @example
+    #   give("basicxman", "diamond")
+    # @note ops: hop
+    # @note all: is providing kits to all.
+    def kit(user, group)
+      KITS[group.to_sym].each do |item|
+        if item.is_a? Array
+          @server.puts construct_give(user, item.first, item.last)
         else
-          @kickvotes[target_user][:votes] << user
-          @kickvotes[target_user][:tally] += kick_influence(user)
-          check_kickvote(target_user)
+          @server.puts "give #{user} #{item} 1"
         end
+      end
+    end
+
+    # Teleports the current user to the target user.
+    #
+    # @param [String] user Current user.
+    # @param [String] target User to teleport to.
+    # @example
+    #   tp("basicxman", "mike_n_7")
+    # @note ops: hop
+    # @note all: is teleporting all users to their location.
+    def tp(user, target)
+      return if check_dnd(target)
+      @server.puts "tp #{user} #{target}"
+    end
+
+    # Teleports all users to the target user.  Overrides !tpall.
+    #
+    # @param [String] user Current (target) user.
+    # @example
+    #   tpall("basicxman")
+    def tpall(user)
+      @users.each { |u| tp(u, user) unless @userdnd.include? u.downcase }
+    end
+
+    # Gives a golden apple to the specified user.
+    #
+    # @param [String] user Target user.
+    # @example
+    #   nom("basicxman")
+    # @note ops: hop
+    # @note all: is providing noms to all.
+    def nom(user)
+      @server.puts "give #{user} 322 1"
+    end
+
+    # Gives multiple golden apples to the specified user.
+    #
+    # @param [String] user Target user.
+    # @param args noms!
+    # @example
+    #   om("basicxman", "nom", "nom", "nom")
+    # @note ops: hop
+    # @note all: is noming everybody, gross.
+    def om(user, *args)
+      args.length.times { nom(user) }
+    end
+
+    # Outputs the current value of a server property.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] key The server property requested.
+    # @example
+    #   property("basicxman", "spawn-monsters")
+    #   property("basicxman")
+    # @note ops: op
+    def property(user, key = nil)
+      if key.nil?
+        (@server_properties.length / 3.0).ceil.times do |n|
+          @server.puts "say #{@server_properties.keys[n * 3, 3].join(", ")}"
+        end
+      else
+        @server.puts "say #{key} is currently #{@server_properties[key]}" if @server_properties.include? key
+      end
+    end
+
+    # Checks the current uptime of the current or target user.  Prints their
+    # connected uptime and their total uptime.  If no target user is specified
+    # it will check the requesting user.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] target_user The user to check.
+    # @example
+    #   uptime("basicxman")
+    #   uptime("basicxman", "mike_n_7")
+    # @note ops: none
+    def uptime(user, target_user = nil)
+      target_user ||= user
+      unless @users.include? target_user
+        if @userlog.has_key? target_user
+          @server.puts "say #{target_user} has #{format_uptime(@userlog[target_user])} minutes of logged time."
+        else
+          @server.puts "say #{target_user} Does not exist."
+        end
+        return
+      end
+
+      time_spent = calculate_uptime(target_user)
+      if @userlog.has_key? target_user
+        total = "  Out of a total of #{format_uptime(@userlog[target_user] + time_spent)} minutes."
+      end
+      @server.puts "say #{target_user} has been online for #{format_uptime(time_spent)} minutes.#{total}"
+    end
+
+    # Will print the server rules to all connected players.
+    #
+    # @example
+    #   rules()
+    # @note ops: none
+    def rules()
+      @server.puts "say #{@rules}"
+    end
+
+    # Lists the currently connecting players, noting which is the requesting
+    # user and which users are ops.
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   list("basicxman")
+    # @note ops: none
+    def list(user)
+      l = @users.inject("") do |s, u|
+        pre, suf = "", ""
+        if u == user
+          pre = "["
+          suf = "]"
+        end
+        pre = pre + "@" if is_op? u
+        pre = pre + "%" if is_hop? u
+        s + "#{", " unless s.empty?}#{pre}#{u}#{suf}"
+      end
+
+      @server.puts "say #{l}"
+    end
+
+    # Adds a timer to the requesting users timers, the item and frequency in
+    # seconds of the timer should be specified.  If the timer already exists
+    # for that item, the frequency is re-assigned.  If the frequency is
+    # unspecified, it will default to 30.
+    #
+    # @param [String] user The requesting user.
+    # @param args item, frequency
+    # @example
+    #   addtimer("basicxman", "cobblestone")
+    #   addtimer("basicxman", "arrow", "10")
+    # @note ops: hop
+    def addtimer(user, *args)
+      item, duration = items_arg(30, args)
+      item = resolve_item(item)
+      @timers[user] ||= {}
+      @timers[user][item] = duration
+      @server.puts "say Timer added for #{user}.  Giving item id #{item} every #{duration} seconds."
+    end
+
+    # Deletes a timer from the requesting user.
+    #
+    # @param [String] user The requesting user.
+    # @param args item
+    # @example
+    #   deltimer("basicxman", "cobblestone")
+    # @note ops: hop
+    def deltimer(user, *args)
+      item = args.join(" ")
+      item = resolve_item(item)
+      @timers[user][item] = nil if @timers.has_key? user
+    end
+
+    # Prints the requesting users current timers.
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   printtimer("basicxman")
+    # @note ops: hop
+    def printtimer(user)
+      unless @timers.has_key? user || @timers[user].length == 0
+        @server.puts "say No timers have been added for #{user}."
+        return
+      end
+      @timers[user].each do |item, frequency|
+        @server.puts "say #{item} every #{frequency} seconds."
+      end
+    end
+
+    # Prints the current value of the counter (seconds since server
+    # initialized).
+    #
+    # @example
+    #   printtimer()
+    # @note ops: op
+    def printtime()
+      @server.puts "say Timer is at #{@counter}."
+    end
+
+    # Adds a shortcut for the user with a given label.  Shortcuts can only be
+    # given for custom commands.  If only a label is given, the shortcut is
+    # executed.
+    #
+    # @param [String] user The requesting user.
+    # @param args label, command array
+    # @example
+    #   s("basicxman", "cobble", "give", "cobblestone", "64")
+    #   s("basicxman", "mike", "tp", "mike_n_7")
+    # @note ops: hop
+    def s(user, *args)
+      return @server.puts "say You need to specify a shortcut silly!" if args.length == 0
+
+      shortcut_name = args.slice! 0
+      if args.length == 0
+        @server.puts "say #{shortcut_name} is not a valid shortcut for #{user}." unless @shortcuts.has_key? user and @shortcuts[user].has_key? shortcut_name
+        return call_command(user, @shortcuts[user][shortcut_name].first, *@shortcuts[user][shortcut_name][1..-1]) if args.length == 0
+      end
+
+      command_string = args
+      @shortcuts[user] ||= {}
+      @shortcuts[user][shortcut_name] = command_string
+      @server.puts "say Shortcut labelled #{shortcut_name} for #{user} has been added."
+    end
+
+    # Prints the requested users shortcuts.
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   shortcuts("basicxman")
+    # @note ops: hop
+    def shortcuts(user, *args)
+      labels = @shortcuts[user].keys.join(", ") if @shortcuts.has_key? user
+      @server.puts "say Shortcuts for #{user}: #{labels}."
+    end
+
+    # Prints the available commands for the user.
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   help("basicxman")
+    # @note ops: none
+    def help(user)
+      commands = @commands.keys.inject([]) { |arr, key|
+        priv = @commands[key][:ops]
+        if is_op? user
+          arr << key
+        elsif is_hop? user
+          priv == :op ? arr : arr << key
+        else
+          priv == :none ? arr << key : arr
+        end
+      }.map { |s| "!" + s.to_s }
+      temp_length = 0
+      buf = []
+      commands.each do |command|
+        temp_length += command.length + 2
+        if temp_length > 60
+          @server.puts "#{buf.join(", ")}"
+          buf = [command]
+          temp_length = command.length
+        else
+          buf << command
+        end
+      end
+      @server.puts "#{buf.join(", ")}" unless buf.empty?
+    end
+
+    # Prints the list of available kits to the connected players.
+    #
+    # @example
+    #   kitlist()
+    # @note ops: none
+    def kitlist()
+      @server.puts "say Kits: #{KITS.keys.join(", ")}"
+    end
+
+    private
+
+    # Checks if the user does not wish to be disturbed and prints an error
+    # notice if so.
+    #
+    # @param [String] user The requesting user.
+    # @return [Boolean] Returns true if the user does not wish to be disturbed
+    # (should cancel action).
+    # @example
+    #   check_dnd("basicxman")
+    def check_dnd(user)
+      if @userdnd.include? user.downcase
+        @server.puts "say #{user} does not wish to be disturbed, don't be a jerk!"
         return true
       else
         return false
       end
+    end
+
+    # Validates a kit group, if the kit cannot be found it executes the
+    # !kitlist command.
+    def validate_kit(group = "")
+      return true if KITS.include? group.to_sym
+      @server.puts "say #{group} is not a valid kit."
+      kitlist
+    end
+
+    # Changes the time of day.
+    #
+    # @param [String] time The time of day to change it to.
+    # @example
+    #   change_time("morning")
+    def change_time(time)
+      return false unless TIME.include? time
+      @server.puts "time set #{TIME[time]}"
+      @server.puts "say #{TIME_QUOTES[time]}" unless TIME_QUOTES[time] == ""
+      return true
     end
 
     # Checks a kickvote entry to see if the tally number has crossed the
@@ -264,331 +648,39 @@ module Minecraft
       end
     end
 
-    # Kicks a random person, the requesting user has a higher cance of being
-    # picked.
+    # Submits a kickvote.
     #
-    # @param [String] user The requesting user.
+    # @param [String] user The requesting user who is voting.
+    # @param [String] target_user The user being voted against.
+    # @return [Boolean] Returns true if the kickvote has been initiated yet.
     # @example
-    #   roulette("basicxman")
-    def roulette(user)
-      users = @users + [user] * 3
-      picked_user = users.sample
-      @server.puts "say #{user} has requested a roulette kick, s/he has a higher chance of being kicked."
-      @server.puts "kick #{picked_user}"
-    end
-
-    # Changes the time of day.
-    #
-    # @param [String] time The time of day to change it to.
-    # @example
-    #   change_time("morning")
-    def change_time(time)
-      return false unless TIME.include? time
-      @server.puts "time set #{TIME[time]}"
-      @server.puts "say #{TIME_QUOTES[time]}" unless TIME_QUOTES[time] == ""
-      return true
-    end
-
-    # Gives half-op privileges to the target user.
-    #
-    # @param [String] user The requesting user.
-    # @param [String] target_user The target user to be hop'ed.
-    # @example
-    #   hop("basicxman", "blizzard4U")
-    def hop(user, target_user)
-      @hops << target_user.downcase unless @hops.include? target_user.downcase
-      @server.puts "#{target_user} is now a hop, thanks #{user}!"
-    end
-
-    # De-half-ops the target user.
-    #
-    # @param [String] user The requesting user.
-    # @param [String] target_user The target user to be de-hop'ed.
-    # @example
-    #   dehop("basicxman", "blizzard4U")
-    def dehop(user, target_user)
-      @hops.reject! { |u| u == target_user.downcase }
-      @server.puts "#{target_user} has been de-hoped, thanks #{user}!"
-    end
-
-    # Give command takes an item name or numeric id and a quantifier.  If a
-    # quantifier is not specified then the quantity defaults to 1.  Items will
-    # try to resolved if they are not an exact match.
-    #
-    # @param [String] user Target user of the command.
-    # @example
-    #   give("basicxman", "cobblestone")
-    #   give("basicxman", "cobblestone", "9m")
-    #   give("basicxman", "flint", "and", "steel", "1")
-    #   give("basicxman", "4")
-    def give(user, *args)
-      item, quantity = items_arg(1, args)
-      item = resolve_item(item)
-
-      construct_give(user, item, quantity)
-    end
-
-    # Validates a kit group, if the kit cannot be found it executes the
-    # !kitlist command.
-    def validate_kit(group = "")
-      return true if KITS.include? group.to_sym
-      @server.puts "say #{group} is not a valid kit."
-      kitlist
-    end
-
-    # Kit command takes a group name and gives the contents of the kit to the
-    # target user.
-    #
-    # @param [String] user Target user of the command.
-    # @param [String] group Label of the kit.
-    # @example
-    #   give("basicxman", "diamond")
-    def kit(user, group)
-      KITS[group.to_sym].each do |item|
-        if item.is_a? Array
-          @server.puts construct_give(user, item.first, item.last)
+    #   submit_vote("basicxman", "blizzard4U")
+    def submit_vote(user, target_user)
+      return unless @users.include? target_user
+      if @kickvotes.has_key? target_user
+        if @kickvotes[target_user][:votes].include? user
+          @server.puts "say You have already voted."
         else
-          @server.puts "give #{user} #{item} 1"
+          @kickvotes[target_user][:votes] << user
+          @kickvotes[target_user][:tally] += kick_influence(user)
+          check_kickvote(target_user)
         end
-      end
-    end
-
-    # Teleports the current user to the target user.
-    #
-    # @param [String] user Current user.
-    # @param [String] target User to teleport to.
-    # @example
-    #   tp("basicxman", "mike_n_7")
-    def tp(user, target)
-      return if check_dnd(target)
-      @server.puts "tp #{user} #{target}"
-    end
-
-    # Teleports all users to the target user.  Overrides !tpall.
-    #
-    # @param [String] user Current (target) user.
-    # @example
-    #   tpall("basicxman")
-    def tpall(user, *args)
-      @users.each { |u| tp(u, user) unless @userdnd.include? u.downcase }
-    end
-
-    # Gives a golden apple to the specified user.
-    #
-    # @param [String] user Target user.
-    # @example
-    #   nom("basicxman")
-    def nom(user)
-      @server.puts "give #{user} 322 1"
-    end
-
-    # Gives multiple golden apples to the specified user.
-    #
-    # @param [String] user Target user.
-    # @param args noms!
-    # @example
-    #   om("basicxman", "nom", "nom", "nom")
-    def om(user, *args)
-      args.length.times { nom(user) }
-    end
-
-    # Outputs the current value of a server property.
-    #
-    # @param [String] user The requesting user.
-    # @param [String] key The server property requested.
-    # @example
-    #   property("basicxman", "spawn-monsters")
-    #   property("basicxman")
-    def property(user, key = nil)
-      if key.nil?
-        (@server_properties.length / 3.0).ceil.times do |n|
-          @server.puts "say #{@server_properties.keys[n * 3, 3].join(", ")}"
-        end
+        return true
       else
-        @server.puts "say #{key} is currently #{@server_properties[key]}" if @server_properties.include? key
+        return false
       end
     end
 
-    # Checks the current uptime of the current or target user.  Prints their
-    # connected uptime and their total uptime.  If no target user is specified
-    # it will check the requesting user.
+    # Caps the quantity of points able to be given based on requesting user.
     #
     # @param [String] user The requesting user.
-    # @param [String] target_user The user to check.
+    # @return [Integer] Maximum quantity of points.
     # @example
-    #   uptime("basicxman")
-    #   uptime("basicxman", "mike_n_7")
-    def uptime(user, target_user = nil)
-      target_user ||= user
-      unless @users.include? target_user
-        if @userlog.has_key? target_user
-          @server.puts "say #{target_user} has #{format_uptime(@userlog[target_user])} minutes of logged time."
-        else
-          @server.puts "say #{target_user} Does not exist."
-        end
-        return
-      end
-
-      time_spent = calculate_uptime(target_user)
-      if @userlog.has_key? target_user
-        total = "  Out of a total of #{format_uptime(@userlog[target_user] + time_spent)} minutes."
-      end
-      @server.puts "say #{target_user} has been online for #{format_uptime(time_spent)} minutes.#{total}"
-    end
-
-    # Will print the server rules to all connected players.
-    #
-    # @example
-    #   rules()
-    def rules(*args)
-      @server.puts "say #{@rules}"
-    end
-
-    # Lists the currently connecting players, noting which is the requesting
-    # user and which users are ops.
-    #
-    # @param [String] user The requesting user.
-    # @example
-    #   list("basicxman")
-    def list(user)
-      l = @users.inject("") do |s, u|
-        pre, suf = "", ""
-        if u == user
-          pre = "["
-          suf = "]"
-        end
-        pre = pre + "@" if is_op? u
-        pre = pre + "%" if is_hop? u
-        s + "#{", " unless s.empty?}#{pre}#{u}#{suf}"
-      end
-
-      @server.puts "say #{l}"
-    end
-
-    # Adds a timer to the requesting users timers, the item and frequency in
-    # seconds of the timer should be specified.  If the timer already exists
-    # for that item, the frequency is re-assigned.  If the frequency is
-    # unspecified, it will default to 30.
-    #
-    # @param [String] user The requesting user.
-    # @param args item, frequency
-    # @example
-    #   addtimer("basicxman", "cobblestone")
-    #   addtimer("basicxman", "arrow", "10")
-    def addtimer(user, *args)
-      item, duration = items_arg(30, args)
-      item = resolve_item(item)
-      @timers[user] ||= {}
-      @timers[user][item] = duration
-      @server.puts "say Timer added for #{user}.  Giving item id #{item} every #{duration} seconds."
-    end
-
-    # Deletes a timer from the requesting user.
-    #
-    # @param [String] user The requesting user.
-    # @param args item
-    # @example
-    #   deltimer("basicxman", "cobblestone")
-    def deltimer(user, *args)
-      item = args.join(" ")
-      item = resolve_item(item)
-      @timers[user][item] = nil if @timers.has_key? user
-    end
-
-    # Prints the requesting users current timers.
-    #
-    # @param [String] user The requesting user.
-    # @example
-    #   printtimer("basicxman")
-    def printtimer(user)
-      unless @timers.has_key? user || @timers[user].length == 0
-        @server.puts "say No timers have been added for #{user}."
-        return
-      end
-      @timers[user].each do |item, frequency|
-        @server.puts "say #{item} every #{frequency} seconds."
-      end
-    end
-
-    # Prints the current value of the counter (seconds since server
-    # initialized).
-    #
-    # @example
-    #   printtimer("basicxman")
-    def printtime(user)
-      @server.puts "say Timer is at #{@counter}."
-    end
-
-    # Adds a shortcut for the user with a given label.  Shortcuts can only be
-    # given for custom commands.  If only a label is given, the shortcut is
-    # executed.
-    #
-    # @param [String] user The requesting user.
-    # @param args label, command array
-    # @example
-    #   s("basicxman", "cobble", "give", "cobblestone", "64")
-    #   s("basicxman", "mike", "tp", "mike_n_7")
-    def s(user, *args)
-      return @server.puts "say You need to specify a shortcut silly!" if args.length == 0
-
-      shortcut_name = args.slice! 0
-      if args.length == 0
-        @server.puts "say #{shortcut_name} is not a valid shortcut for #{user}." unless @shortcuts.has_key? user and @shortcuts[user].has_key? shortcut_name
-        return call_command(user, @shortcuts[user][shortcut_name].first, *@shortcuts[user][shortcut_name][1..-1]) if args.length == 0
-      end
-
-      command_string = args
-      @shortcuts[user] ||= {}
-      @shortcuts[user][shortcut_name] = command_string
-      @server.puts "say Shortcut labelled #{shortcut_name} for #{user} has been added."
-    end
-
-    # Prints the requested users shortcuts.
-    #
-    # @param [String] user The requesting user.
-    # @example
-    #   shortcuts("basicxman")
-    def shortcuts(user, *args)
-      labels = @shortcuts[user].keys.join(", ") if @shortcuts.has_key? user
-      @server.puts "say Shortcuts for #{user}: #{labels}."
-    end
-
-    # Prints the available commands for the user.
-    #
-    # @param [String] user The requesting user.
-    # @example
-    #   help("basicxman")
-    def help(user)
-      commands = @commands.keys.inject([]) { |arr, key|
-        priv = @commands[key][:ops]
-        if is_op? user
-          arr << key
-        elsif is_hop? user
-          priv == :op ? arr : arr << key
-        else
-          priv == :none ? arr << key : arr
-        end
-      }.map { |s| "!" + s.to_s }
-      temp_length = 0
-      buf = []
-      commands.each do |command|
-        temp_length += command.length + 2
-        if temp_length > 60
-          @server.puts "#{buf.join(", ")}"
-          buf = []
-          temp_length = 0
-        else
-          buf << command
-        end
-      end
-    end
-
-    # Prints the list of available kits to the connected players.
-    #
-    # @example
-    #   kitlist()
-    def kitlist(*args)
-      @server.puts "say Kits: #{KITS.keys.join(", ")}"
+    #   cap_points("basicxman")
+    def cap_points(user)
+      return 1000 if is_op? user
+      return 500  if is_hop? user
+      return 1
     end
 
     # Helper method for printing the final give statements to the server.  If a

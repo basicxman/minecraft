@@ -33,42 +33,38 @@ module Minecraft
 
       # Command set.
       @commands = {}
-      add_command :give,       :ops => :hop,  :all => true, :all_message => "is putting out."
-      add_command :tp,         :ops => :hop,  :all => true, :all_message => "is teleporting all users to their location."
-      add_command :kit,        :ops => :hop,  :all => true, :all_message => "is providing kits to all."
-      add_command :kitlist,    :ops => :hop,  :all => false
-      add_command :help,       :ops => :none, :all => false
-      add_command :rules,      :ops => :none, :all => false
-      add_command :nom,        :ops => :hop,  :all => true, :all_message => "is providing noms to all."
-      add_command :om,         :ops => :hop,  :all => true, :all_message => "is noming everybody, gross."
-      add_command :list,       :ops => :none, :all => false
-      add_command :s,          :ops => :hop,  :all => false
-      add_command :shortcuts,  :ops => :hop,  :all => false
-      add_command :hop,        :ops => :op,   :all => false
-      add_command :dehop,      :ops => :op,   :all => false
-      add_command :uptime,     :ops => :none, :all => false
-      add_command :addtimer,   :ops => :hop,  :all => false
-      add_command :deltimer,   :ops => :hop,  :all => false
-      add_command :printtimer, :ops => :hop,  :all => false
-      add_command :printtime,  :ops => :op,   :all => false
-      add_command :property,   :ops => :op,   :all => false
-      add_command :morning,    :ops => :op,   :all => false
-      add_command :evening,    :ops => :op,   :all => false
-      add_command :day,        :ops => :op,   :all => false
-      add_command :night,      :ops => :op,   :all => false
-      add_command :dawn,       :ops => :op,   :all => false
-      add_command :dusk,       :ops => :op,   :all => false
-      add_command :roulette,   :ops => :op,   :all => false
-      add_command :kickvote,   :ops => :none, :all => false
-      add_command :vote,       :ops => :none, :all => false
-      add_command :cancelvote, :ops => :op,   :all => false
-      add_command :kickvotes,  :ops => :op,   :all => false
-      add_command :points,     :ops => :none, :all => false
-      add_command :board,      :ops => :none, :all => false
-      add_command :dnd,        :ops => :none, :all => false
-      add_command :disturb,    :ops => :op,   :all => false
-      add_command :printdnd,   :ops => :op,   :all => false
-      add_command :disco,      :ops => :op,   :all => false
+      commands = Minecraft::Commands.public_instance_methods
+      @command_info = File.read(method(commands.first).source_location.first).split("\n")
+      @enums = [ :ops ]
+      commands.each do |sym|
+        next if sym.to_s.end_with? "all"
+        meth  = method(sym)
+        src_e = meth.source_location.last - 2
+        src_b = (0..src_e - 1).to_a.reverse.detect(src_e - 1) { |n| not @command_info[n] =~ /^\s+#/ } + 1
+        @commands[sym] = {
+          :help => "",
+          :ops => :none,
+          :params => meth.parameters
+        }
+        help_done = false
+        (src_b..src_e).each do |n|
+          line = @command_info[n].strip[2..-1]
+          if line.nil?
+            help_done = true
+            next
+          end
+
+          unless help_done
+            @commands[sym][:help] += " " unless @commands[sym][:help].empty?
+            @commands[sym][:help] += line
+          end
+
+          if line.index("@note") == 0
+            key, value = line[6..-1].split(": ")
+            @commands[sym][key.to_sym] = @enums.include?(key.to_sym) ? value.to_sym : value
+          end
+        end
+      end
     end
 
     # Sets an instance variable with it's corresponding data file or a blank hash.
@@ -133,15 +129,16 @@ module Minecraft
       end
 
       is_all = @commands[root][:all] if is_all
+      args = [user] + args unless @commands[root][:params].length == 0
       if is_all
-        @server.puts "say #{user} #{@commands[root][:all_message]}"
+        @server.puts "say #{user} #{@commands[root][:all]}"
         if respond_to? command
-          send(command, user, *args)
+          send(command, *args)
         else
-          @users.each { |u| send(root, u, *args) unless @userdnd.include? u.downcase }
+          @users.each { |u| send(root, u, *args[1..-1]) unless @userdnd.include? u.downcase }
         end
       else
-        send(root, user, *args)
+        send(root, *args)
       end
     end
 
@@ -295,7 +292,6 @@ module Minecraft
     # If a command method is called and is not specified, take in the arguments
     # here and attempt to !give the player the item.  Otherwise print an error.
     def method_missing(sym, *args)
-      return if change_time(sym)
       item, quantity = items_arg(1, [sym.to_s.downcase, args.last])
       item = resolve_item(item)
       if item and is_op? args.first

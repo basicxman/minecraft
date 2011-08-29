@@ -267,4 +267,15 @@ eof
     assert_match "time set 0", @ext.server.string
     assert_match "time set 16000", @ext.server.string
   end
+
+  # Teleport all.
+  sandbox_test "should teleport all users to an op" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.users = ["basicxman", "mike_n_7", "blizzard4U", "Ian_zers"]
+    @ext.ops = ["basicxman"]
+    @ext.call_command("basicxman", "tpall")
+    assert_match "mike_n_7", @ext.server.string
+    assert_match "blizzard4U", @ext.server.string
+    assert_match "Ian_zers", @ext.server.string
+  end
 end
