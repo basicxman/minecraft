@@ -468,6 +468,7 @@ module Minecraft
       item = args.join(" ")
       item = resolve_item(item)
       @timers[user][item] = nil if @timers.has_key? user
+      @server.puts "say #{item} timer is deleted."
     end
 
     # Prints the requesting users current timers.
@@ -507,11 +508,12 @@ module Minecraft
     #   s("basicxman", "mike", "tp", "mike_n_7")
     # @note ops: hop
     def s(user, *args)
-      return @server.puts "say You need to specify a shortcut silly!" if args.length == 0
-
       shortcut_name = args.slice! 0
       if args.length == 0
-        @server.puts "say #{shortcut_name} is not a valid shortcut for #{user}." unless @shortcuts.has_key? user and @shortcuts[user].has_key? shortcut_name
+        unless @shortcuts.has_key? user and @shortcuts[user].has_key? shortcut_name
+          return kit(user, shortcut_name) if KITS.include? shortcut_name.to_sym
+          @server.puts "say #{shortcut_name} is not a valid shortcut for #{user}."
+        end
         return call_command(user, @shortcuts[user][shortcut_name].first, *@shortcuts[user][shortcut_name][1..-1]) if args.length == 0
       end
 
@@ -527,7 +529,7 @@ module Minecraft
     # @example
     #   shortcuts("basicxman")
     # @note ops: hop
-    def shortcuts(users)
+    def shortcuts(user)
       labels = @shortcuts[user].keys.join(", ") if @shortcuts.has_key? user
       @server.puts "say Shortcuts for #{user}: #{labels}."
     end
