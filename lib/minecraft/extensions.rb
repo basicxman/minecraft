@@ -3,6 +3,7 @@ module Minecraft
   # manage custom functionality additional to default Notchian Minecraft
   # behaviour.
   class Extensions
+    attr_accessor :welcome_message
     include Commands
 
     # New Extensions instance.

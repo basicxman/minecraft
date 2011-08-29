@@ -286,6 +286,18 @@ eof
     assert_match "Ian_zers", @ext.server.string
   end
 
+  # Welcome message runtime change test.
+  sandbox_test "should change welcome message during runtime" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.ops = ["basicxman"]
+    @ext.call_command("basicxman", "welcome", "Foo bar.")
+    assert_equal "Foo bar.", @ext.welcome_message
+
+    @ext.call_command("basicxman", "welcome", "+", "%")
+    assert_equal "Foo bar. %", @ext.welcome_message
+    assert_match "basicxman", @ext.server.string
+  end
+
   # Remaining commands testing (should test to ensure no errors are thrown in
   # the command execution).
   sandbox_test "should run commands without failure" do

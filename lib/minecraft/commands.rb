@@ -4,6 +4,25 @@ module Minecraft
   module Commands
     include Data
 
+    # Changes or appends to the welcome message.  Use !welcome + foo to add foo.
+    #
+    # @param [String] user The requesting user.
+    # @param args The welcome message.
+    # @example
+    #   welcome("basicxman", "Welcome", "to", "the", "server")
+    #   welcome("basicxman", "+", "%")
+    # @note ops: op
+    def welcome(user, *args)
+      if args.first == "+"
+        @welcome_message += " " + args[1..-1].join(" ")
+        @server.puts "say Appended to welcome message."
+      else
+        @welcome_message = args.join(" ")
+        @server.puts "say Changed welcome message."
+      end
+      display_welcome_message("basicxman")
+    end
+
     # Changes to dawn.
     #
     # @example

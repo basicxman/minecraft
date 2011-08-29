@@ -36,6 +36,8 @@ module Minecraft
     # Server is stopped gracefully.
     def minecraft_exit
       puts "[+] Restoring previous mob state to #{Minecraft::Tools.toggle_mobs}." if @opts[:tempmobs]
+      puts "[~] The current welcome message is:"
+      puts @extensions.welcome_message
       puts "\n[+] Saving..."
       @extensions.save
       @threads.each(&:kill)
