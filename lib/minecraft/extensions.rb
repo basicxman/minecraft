@@ -280,9 +280,7 @@ module Minecraft
       user = user.downcase
       return unless @memos.has_key? user
 
-      @memos[user].each do |m|
-        @server.puts "say Message from: #{m.first} - #{m.last}"
-      end
+      @memos[user].each { |m| say("Message from: #{m.first} - #{m.last}") }
       @memos[user] = []
     end
 
@@ -400,6 +398,19 @@ module Minecraft
       Time.now - (@logon_time[user] || 0)
     end
 
+    # Executes the say command with proper formatting (i.e. wrapping at sixty
+    # characters).
+    #
+    # @param [String] message The message to print properly.
+    # @example
+    #   say("The quick brown fox jumped over the lazy dog.")
+    def say(message)
+      (message.length / 50.0).ceil.times do |n|
+        temp = message[(50 * n), 50]
+        @server.puts "say #{temp}"
+      end
+    end
+
     # Check if a user has op privileges.
     #
     # @param [String] user The specified user.
@@ -453,7 +464,7 @@ module Minecraft
 
     # Display a welcome message to a recently connected user.
     def display_welcome_message(user)
-      @server.puts "say #{@welcome_message.gsub('%', user)}" unless @welcome_message.nil?
+      say("#{@welcome_message.gsub('%', user)}") unless @welcome_message.nil?
     end
   end
 end

@@ -175,6 +175,15 @@ eof
     assert_match "kick Ian_zers", @ext.server.string
   end
 
+  # Timer test.
+  sandbox_test "should not add a timer if the item does not exist" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.hops = ["basicxman"]
+    @ext.call_command("basicxman", "addtimer", "foo")
+    assert_nil @ext.timers["basicxman"]
+    assert_match "not added", @ext.server.string
+  end
+
   # Stop timer test.
   sandbox_test "should stop all timers" do
     @ext = Minecraft::Extensions.new(StringIO.new, {})
@@ -216,7 +225,7 @@ eof
     @ext = Minecraft::Extensions.new(StringIO.new, {})
     @ext.users = ["blizzard4U"]
     @ext.call_command("blizzard4U", "help")
-    t = @ext.server.string.gsub("\n", " ")
+    t = @ext.server.string.gsub("\n", "").gsub("say", "").gsub(" ", "")
     assert_match "rules", t
     assert_match "list", t
     refute_match "give", t
@@ -227,7 +236,7 @@ eof
     @ext.users = ["mike_n_7"]
     @ext.hops  = ["mike_n_7"]
     @ext.call_command("mike_n_7", "help")
-    t = @ext.server.string.gsub("\n", " ")
+    t = @ext.server.string.gsub("\n", "").gsub("say", "").gsub(" ", "")
     assert_match "rules", t
     assert_match "give", t
     refute_match "morning", t
@@ -238,7 +247,7 @@ eof
     @ext.users = ["basicxman"]
     @ext.ops   = ["basicxman"]
     @ext.call_command("basicxman", "help")
-    t = @ext.server.string.gsub("\n", " ")
+    t = @ext.server.string.gsub("\n", "").gsub("say", "").gsub(" ", "")
     assert_match "rules", t
     assert_match "give", t
     assert_match "morning", t
@@ -248,7 +257,49 @@ eof
     @ext = Minecraft::Extensions.new(StringIO.new, {})
     @ext.users = ["basicxman"]
     @ext.call_command("basicxman", "help", "hop")
-    assert_match "privileges to the target user", @ext.server.string
+    assert_match "privileges to the target user", @ext.server.string.gsub("\n", "")
+  end
+
+  sandbox_test "should display command syntaxes" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.ops = ["basicxman"]
+
+    # None
+    @ext.call_command("basicxman", "help", "day")
+    t = @ext.server.string.split("\n")
+    assert_equal "say !day", t[0]
+
+    # opt
+    @ext.server.string = ""
+    @ext.call_command("basicxman", "help", "warptime")
+    t = @ext.server.string.split("\n")
+    assert_equal "say !warptime", t[0]
+    assert_equal "say !warptime 'time change'", t[1]
+
+    # rest
+    @ext.server.string = ""
+    @ext.call_command("basicxman", "help", "welcome")
+    t = @ext.server.string.split("\n")
+    assert_equal "say !welcome 'arguments', '...'", t[0]
+
+    # req, rest
+    @ext.server.string = ""
+    @ext.call_command("basicxman", "help", "memo")
+    t = @ext.server.string.split("\n")
+    assert_equal "say !memo 'target user', 'arguments', '...'", t[0]
+
+    # req
+    @ext.server.string = ""
+    @ext.call_command("basicxman", "help", "disturb")
+    t = @ext.server.string.split("\n")
+    assert_equal "say !disturb 'target user'", t[0]
+
+    # req, opt
+    @ext.server.string = ""
+    @ext.call_command("basicxman", "help", "points")
+    t = @ext.server.string.split("\n")
+    assert_equal "say !points 'target user'", t[0]
+    assert_equal "say !points 'target user', 'num points'", t[1]
   end
 
   # Do not disturb testing.

@@ -4,11 +4,11 @@ module Minecraft
   module Commands
     include Data
 
-    # Allows a user to specify a periodic (once every minute) time change.
+    # Allows a user to specify a periodic (once every ten seconds) time change.
     #
     # @param [String] user The requesting user.
     # @param [Integer] time_change Amount of time to add (can be negative or
-    # positive) each second.
+    # positive) every ten seconds.
     # @example
     #   warptime("basicxman", "5")
     #   warptime("basicxman")
@@ -44,7 +44,7 @@ module Minecraft
 
       @memos[target_user] ||= []
       @memos[target_user] << [user, args.join(" ")]
-      @server.puts "say Memo for #{target_user} added. Will be printed next time s/he logs in."
+      say "Memo for #{target_user} added. Will be printed next time s/he logs in."
     end
 
     # Stops all timers for a user.
@@ -525,6 +525,7 @@ module Minecraft
     def addtimer(user, *args)
       item, duration = items_arg(30, args)
       item = resolve_item(item)
+      return @server.puts "say Timer was not added." if item.nil?
       @timers[user] ||= {}
       @timers[user][item] = duration
       @server.puts "say Timer added for #{user}.  Giving item id #{item} every #{duration} seconds."
@@ -540,8 +541,12 @@ module Minecraft
     def deltimer(user, *args)
       item = args.join(" ")
       item = resolve_item(item)
-      @timers[user][item] = nil if @timers.has_key? user
-      @server.puts "say #{item} timer is deleted."
+      if @timers.has_key? user
+        @timers[user].delete item
+        @server.puts "say #{item} timer is deleted."
+      else
+        @server.puts "say #{item} timer did not exist."
+      end
     end
 
     # Prints the requesting users current timers.
@@ -616,8 +621,8 @@ module Minecraft
     def help(user, command = nil)
       unless command.nil?
         return @server.puts "say #{command} does not exist." unless @commands.has_key? command.to_sym
-        @server.puts "say !#{command}"
-        @server.puts "say #{@commands[command.to_sym][:help]}"
+        command_signature(command.to_sym)
+        say(@commands[command.to_sym][:help])
         return
       end
 
@@ -631,19 +636,7 @@ module Minecraft
           priv == :none ? arr << key : arr
         end
       }.map { |s| "!" + s.to_s }
-      temp_length = 0
-      buf = []
-      commands.each do |command|
-        temp_length += command.length + 2
-        if temp_length > 60
-          @server.puts "say #{buf.join(", ")}"
-          buf = [command]
-          temp_length = command.length
-        else
-          buf << command
-        end
-      end
-      @server.puts "say #{buf.join(", ")}" unless buf.empty?
+      say(commands.join(", "))
     end
 
     # Prints the list of available kits to the connected players.
@@ -698,6 +691,42 @@ module Minecraft
 
     private
 
+    # Prints the command signature options for a specified command.
+    #
+    # @param [Symbol] command The command method.
+    # @example
+    #   command_signature(:give)
+    def command_signature(command)
+      params = method(command).parameters || []
+
+      return if params.length == 0
+      params.slice! 0 if params[0][1] == :user
+      if params.length == 1
+        name = params[0][1].to_s.gsub("_", " ")
+        type = params[0][0]
+        case type
+        when :opt
+          say("!#{command}")
+          say("!#{command} '#{name}'")
+        when :rest
+          say("!#{command} 'arguments', '...'")
+        when :req
+          say("!#{command} '#{name}'")
+        end
+      elsif params.length == 2
+        first_name = params[0][1].to_s.gsub("_", " ")
+        second_name = params[1][1].to_s.gsub("_", " ")
+        type = params[1][0]
+        case type
+        when :rest
+          say("!#{command} '#{first_name}', 'arguments', '...'")
+        when :opt
+          say("!#{command} '#{first_name}'")
+          say("!#{command} '#{first_name}', '#{second_name}'")
+        end
+      end
+    end
+
     # Checks if the user does not wish to be disturbed and prints an error
     # notice if so.
     #
@@ -708,7 +737,7 @@ module Minecraft
     #   check_dnd("basicxman")
     def check_dnd(user)
       if @userdnd.include? user.downcase
-        @server.puts "say #{user} does not wish to be disturbed, don't be a jerk!"
+        say("#{user} does not wish to be disturbed, don't be a jerk!")
         return true
       else
         return false
