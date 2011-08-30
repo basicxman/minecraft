@@ -264,11 +264,6 @@ eof
     @ext = Minecraft::Extensions.new(StringIO.new, {})
     @ext.ops = ["basicxman"]
 
-    # None
-    @ext.call_command("basicxman", "help", "day")
-    t = @ext.server.string.split("\n")
-    assert_equal "say !day", t[0]
-
     # opt
     @ext.server.string = ""
     @ext.call_command("basicxman", "help", "warptime")

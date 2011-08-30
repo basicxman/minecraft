@@ -11,7 +11,7 @@ module Minecraft
     # @param [IO] server The standard input pipe of the server process.
     # @param [Slop] opts Command line options from Slop.
     def initialize(server, opts)
-      @ops = File.readlines("ops.txt").map { |s| s.chomp }
+      @ops = File.readlines("ops.txt").map { |s| s.chomp } if File.exists? "ops.txt"
       get_json :hops, []
       get_json :uptime
       get_json :timers
@@ -28,6 +28,8 @@ module Minecraft
       @kickvotes = {}
       @last_kick_vote = nil
       load_server_properties
+
+      @ic = Iconv.new("UTF-8//IGNORE", "UTF-8")
 
       opts.to_hash.each { |k, v| instance_variable_set("@#{k}", v) }
       @vote_expiration ||= 300
@@ -203,6 +205,7 @@ module Minecraft
 
     # Processes a line from the console.
     def process(line)
+      line = @ic.iconv(line) if line.index "7"
       puts colour(line.dup)
       return info_command(line) if line.index "INFO"
     rescue Exception => e
@@ -405,10 +408,18 @@ module Minecraft
     # @example
     #   say("The quick brown fox jumped over the lazy dog.")
     def say(message)
-      (message.length / 50.0).ceil.times do |n|
-        temp = message[(50 * n), 50]
-        @server.puts "say #{temp}"
+      temp_length, buf = 0, []
+      message.split(" ").each do |word|
+        temp_length += word.length
+        if temp_length > 45
+          @server.puts "say #{buf.join(" ")}"
+          buf = [word]
+          temp_length = word.length
+        else
+          buf << word
+        end
       end
+      @server.puts "say #{buf.join(" ")}" unless buf.empty?
     end
 
     # Check if a user has op privileges.

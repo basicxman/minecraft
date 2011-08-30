@@ -31,6 +31,7 @@ module Minecraft
 
     # Toggles mobs in server.properties and returns the new state.
     def self.toggle_mobs
+      return unless File.exists? "server.properties"
       content = File.read("server.properties")
       state = content.match(/spawn\-monsters=(true|false)/)[1]
       new_state = state == "true" ? "false" : "true"

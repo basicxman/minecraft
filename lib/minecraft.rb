@@ -1,3 +1,4 @@
+require "iconv"
 require "json/pure"
 require "minecraft/tools"
 require "minecraft/data"

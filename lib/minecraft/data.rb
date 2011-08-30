@@ -30,11 +30,11 @@ module Minecraft
 
     # Quotes for each time of day.
     TIME_QUOTES = {
-      :morning => "Anyone like a little toasted zombie?",
+      :morning => "",
       :evening => "Let them come.",
       :day     => "",
       :night   => "",
-      :dawn    => "What are you doing? Those wraiths are still out there.",
+      :dawn    => "",
       :dusk    => ""
     }
 
