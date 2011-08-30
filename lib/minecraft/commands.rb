@@ -655,6 +655,47 @@ module Minecraft
       @server.puts "say Kits: #{KITS.keys.join(", ")}"
     end
 
+    # Adds or prints the current todo list items.
+    #
+    # @param [String] user The requesting user.
+    # @param args The item.
+    # @example
+    #   todo("basicxman", "foo")
+    #   todo("basicxman")
+    # @note ops: none
+    def todo(user, *args)
+      if args.length == 0
+        @todo_items.each_with_index do |item, index|
+          @server.puts "say #{index + 1}. #{item}"
+        end
+        return
+      end
+
+      item = args.join(" ")
+      @todo_items << item
+      @server.puts "say Added item."
+    end
+
+    # Removes an item from the todo list.
+    #
+    # @param [String] user The requesting user.
+    # @param args The item.
+    # @example
+    #   finished("basicxman", "foo")
+    #   finished("basicxman", "2")
+    # @note ops: none
+    def finished(user, *args)
+      item = args.join(" ")
+      if item.to_i.to_s == item
+        index = item.to_i - 1
+      else
+        index = @todo_items.find_index(item)
+      end
+      return @server.puts "say Item does not exist." if index.nil? or @todo_items[index].nil?
+      @todo_items.slice! index
+      @server.puts "say Hurray!"
+    end
+
     private
 
     # Checks if the user does not wish to be disturbed and prints an error

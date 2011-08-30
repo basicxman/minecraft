@@ -20,6 +20,7 @@ module Minecraft
       get_json :userpoints
       get_json :userdnd, []
       get_json :memos
+      get_json :todo_items, []
       @users = []
       @counter = 0
       @logon_time = {}
@@ -98,7 +99,7 @@ module Minecraft
       instance_variable_set("@#{var}", t)
     end
 
-    # Save the user timers and shortcuts hash to a data file.
+    # Save instance variables to their respective JSON files.
     def save
       save_file :timers
       save_file :shortcuts
@@ -106,6 +107,7 @@ module Minecraft
       save_file :userpoints
       save_file :userdnd
       save_file :memos
+      save_file :todo_items
     end
 
     # Save an instance hash to it's associated data file.
