@@ -1,3 +1,18 @@
+0.3.0 (2011-08-29)
+------------------
+
+* Added `!warptime`, `!stop`, `!welcome`, `!memo`, `!disco`, `!dnd`, `!disturb`, `!printdnd`, `!todo`, `!finished`.
+* Moved time commands out of `method_missing`.
+* Added capability for users to not be disturbed by teleporting or `all` commands.
+* Removed `add_command` calls, now indexes information from source code on initialization.
+* Added more documentation (back at 100% coverage).
+* Added many more test suites.
+* Misc. bug fixes including lots of command feedback.
+* Shortcuts and kits can now be accessed with `:` instead of `!s` or `!kit`.
+* `!help` is now dynamic and includes command-specific help.
+* Coloured terminal output.
+* Basic word wrapped output.
+
 0.2.1 (2011-08-22)
 ------------------
 

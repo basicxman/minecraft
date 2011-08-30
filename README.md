@@ -70,6 +70,18 @@ Please refer to `Minecraft::Extensions#initialize`.
     !board <user>                 # Check a users points.
     !board                        # View the leaderboard of points.
     !om <noms>                    # Give golden apples equivalent to the number of noms.
+    !warptime                     # Prints the current time rate.
+    !warptime <rate>              # Adds <rate> seconds every ten seconds to time.
+    !stop                         # Stops all the users timers.
+    !welcome                      # Changes the welcome message during runtime.
+    !memo <user> <message>        # Leaves a memo for the user.
+    !disco                        # Turns time into a dancefloor.
+    !dnd                          # Toggles the users do-not-disturb status.
+    !disturb <user>               # An op can remove a user from the DND list.
+    !printdnd                     # Prints the list of do-not-disturbed users.
+    !todo                         # Prints the list of items todo.
+    !todo <item>                  # Adds a todo list item.
+    !finished <item>              # Removes an item from the todo list.
 
 Development Path
 ----------------
