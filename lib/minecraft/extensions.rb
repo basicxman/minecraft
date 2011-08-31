@@ -21,6 +21,7 @@ module Minecraft
       get_json :userdnd, []
       get_json :memos
       get_json :todo_items, []
+      get_json :command_history
       @users = []
       @counter = 0
       @logon_time = {}
@@ -110,6 +111,7 @@ module Minecraft
       save_file :userdnd
       save_file :memos
       save_file :todo_items
+      save_file :command_history
     end
 
     # Save an instance hash to it's associated data file.
@@ -138,6 +140,11 @@ module Minecraft
     # @example
     #   call_command("basicxman", "give", "cobblestone", "64")
     def call_command(user, command, *args)
+      unless ["last", "history"].include? command.to_s
+        @command_history[user.downcase] ||= []
+        @command_history[user.downcase] << [command] + args
+      end
+
       is_all = command.to_s.end_with? "all"
       root   = command.to_s.chomp("all").to_sym
       return send(root, user, *args) unless @commands.include? root
@@ -304,6 +311,13 @@ module Minecraft
 
       user = match_data[1]
       args = match_data[2].split(" ")
+
+      if args.length == 0
+        return call_command(user, :last)
+      elsif args.first == "!" * args.first.length
+        return call_command(user, :last, args.first.length + 1)
+      end
+
       call_command(user, args.slice!(0).to_sym, *args)
     end
 
