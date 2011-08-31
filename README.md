@@ -98,11 +98,10 @@ Development Path
 ### Semantic Versioning
 
 - http://semver.org
-- Currently patch level releases are being made, nothing is stable yet.
-- Once tests and documentation has been written a stable minor release will be
-committed.
+- Currently minor and patch level releases are being made, nothing is stable
+yet.
 - Once the repository is completely stable and I am satisified with the feature
-set, a major version will be released.  Any chances afterwards are backwards
+set, a major version will be released.  Any changes afterwards are backwards
 compatible until the major version is incremented.
 
 Contributors
@@ -111,6 +110,27 @@ Contributors
 Forks are welcomed, pull requests will be prompty reviewed!
 
 - Ian Horsman
+
+Pull Request Guide
+------------------
+
+Pull requests are currently being accepted, please make sure that you fork off
+of the `development` branch, preferably then developing on a feature branch.
+
+Make sure your code includes tests and follow similar methodologies used in the
+the code base, make sure to read relevant chunks of the code base before
+committing.  Pull requests will be merged very strictly.
+
+Read [https://github.com/basicxman/minecraft/wiki/Writing-tests](here) for how
+we develop code with test driven development.
+
+For any non-straightforward functionality (especially command naming and
+syntax) you are encouraged to open up an 
+[http://github.com/basicxman/minecraft/issues](issue) for discussion, issues
+will be read and commented on promptly.  Remember to report any bugs as well,
+a bug can be something as simple as a command not returning feedback to the
+user.
+
 
 Notice
 ------
