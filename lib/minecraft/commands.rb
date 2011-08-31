@@ -659,7 +659,7 @@ module Minecraft
     def todo(user, *args)
       if args.length == 0
         @todo_items.each_with_index do |item, index|
-          @server.puts "say #{index + 1}. #{item}"
+          say("say #{index + 1}. #{item}")
         end
         return
       end
@@ -687,6 +687,41 @@ module Minecraft
       return @server.puts "say Item does not exist." if index.nil? or @todo_items[index].nil?
       @todo_items.slice! index
       @server.puts "say Hurray!"
+    end
+
+    # Executes a command from a users history.
+    #
+    # @param [String] user The requesting user.
+    # @param [Integer] history The number of commands to look back.
+    # @example
+    #   last("basicxman")
+    #   last("basicxman", "2")
+    # @note ops: none
+    def last(user, history = 1)
+      user, history = user.downcase, history.to_i
+      if not @command_history.has_key? user or @command_history[user].length < history
+        return say("No command found.")
+      end
+
+      command = @command_history[user][-history]
+      call_command(user, command.first, *command[1..-1])
+      @command_history[user].slice! -1
+    end
+
+    # Prints the last three commands executed.
+    #
+    # @param [String] user The requesting user.
+    # @example
+    #   history("basicxman")
+    # @note ops: none
+    def history(user)
+      user = user.downcase
+      return say("No command history found.") if not @command_history.has_key? user or @command_history[user].length == 0
+
+      i = [@command_history[user].length, 3].min * -1
+      @command_history[user][i, 3].reverse.each_with_index do |command, index|
+        say("#{index + 1}. #{command.join(" ")}")
+      end
     end
 
     private

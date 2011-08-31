@@ -420,6 +420,54 @@ eof
     assert_match "not exist", @ext.server.string
   end
 
+  # Command history.
+  sandbox_test "should keep track of command history and allow users to use previous commands" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.ops = ["basicxman"]
+    @ext.command_history = {}
+    @ext.call_command("basicxman", "dusk")
+    @ext.call_command("basicxman", "dawn")
+    @ext.server.string = ""
+    @ext.call_command("basicxman", "last")
+    @ext.call_command("basicxman", "last", "2")
+    @ext.info_command("2011-08-30 15:52:55 [INFO] <basicxman> !")
+    @ext.info_command("2011-08-30 15:52:55 [INFO] <basicxman> !!")
+    t = @ext.server.string.split("\n")
+    assert_match "time set 0", t[0]
+    assert_match "time set 12000", t[1]
+    assert_match "time set 0", t[2]
+    assert_match "time set 12000", t[3]
+
+    @ext.server.string = ""
+    @ext.call_command("basicxman", "last", "3")
+    assert_match "No command found", @ext.server.string
+  end
+
+  sandbox_test "should print users command history" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.ops = ["basicxman"]
+    @ext.call_command("basicxman", "dawn")
+    @ext.call_command("basicxman", "dusk")
+    @ext.call_command("basicxman", "help", "list")
+    @ext.call_command("basicxman", "give", "4", "64")
+    @ext.server.string = ""
+    @ext.call_command("basicxman", "history")
+    t =  @ext.server.string.split("\n")
+    assert_match "1. give 4 64", t[0]
+    assert_match "2. help list", t[1]
+    assert_match "3. dusk", t[2]
+  end
+
+  sandbox_test "should not add history or last to command history" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.ops = ["basicxman"]
+    @ext.call_command("basicxman", "history")
+    assert_nil @ext.command_history["basicxman"]
+
+    @ext.call_command("basicxman", "last")
+    assert_nil @ext.command_history["basicxman"]
+  end
+
   # Remaining commands testing (should test to ensure no errors are thrown in
   # the command execution).
   sandbox_test "should run commands without failure" do

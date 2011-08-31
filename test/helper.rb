@@ -10,7 +10,7 @@ require "turn"
 
 module Minecraft
   class Extensions
-    attr_accessor :commands, :users, :ops, :hops, :counter, :server, :kickvotes, :last_kick_vote, :uptime, :timers, :shortcuts, :userlog, :userpoints, :vote_threshold, :userdnd, :welcome_message, :memos, :todo_items
+    attr_accessor :commands, :users, :ops, :hops, :counter, :server, :kickvotes, :last_kick_vote, :uptime, :timers, :shortcuts, :userlog, :userpoints, :vote_threshold, :userdnd, :welcome_message, :memos, :todo_items, :command_history
   end
 end
 
@@ -28,6 +28,7 @@ class Test < MiniTest::Unit::TestCase
       FileUtils.cd("mc") do
         FileUtils.touch("ops.txt")
         FileUtils.touch("server.properties")
+        FileUtils.rm_f("command_history.json")
         instance_eval(&block)
       end
     end
