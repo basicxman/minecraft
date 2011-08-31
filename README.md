@@ -125,7 +125,7 @@ Read [https://github.com/basicxman/minecraft/wiki/Writing-tests](here) for how
 we develop code with test driven development.
 
 For any non-straightforward functionality (especially command naming and
-syntax) you are encouraged to open up an 
+syntax) you are encouraged to open up an
 [http://github.com/basicxman/minecraft/issues](issue) for discussion, issues
 will be read and commented on promptly.  Remember to report any bugs as well,
 a bug can be something as simple as a command not returning feedback to the

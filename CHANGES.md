@@ -1,3 +1,10 @@
+0.3.1 (2011-08-30)
+------------------
+
+* Misc bug fixes.
+* Revised README.
+* Removed two time quotes.
+
 0.3.0 (2011-08-29)
 ------------------
 
