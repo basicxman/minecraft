@@ -458,13 +458,18 @@ eof
     assert_match "3. dusk", t[2]
   end
 
-  sandbox_test "should not add history or last to command history" do
+  sandbox_test "should not add the same command to history twice in a row" do
     @ext = Minecraft::Extensions.new(StringIO.new, {})
     @ext.ops = ["basicxman"]
-    @ext.call_command("basicxman", "history")
-    assert_nil @ext.command_history["basicxman"]
+    @ext.call_command("basicxman", "day")
+    @ext.call_command("basicxman", "day")
+    assert_equal [["day"]], @ext.command_history["basicxman"]
+  end
 
-    @ext.call_command("basicxman", "last")
+  sandbox_test "should not add command history from shortucts" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.call_command("basicxman", "s", "foo", "day")
+    @ext.call_command("basicxman", "s", "foo")
     assert_nil @ext.command_history["basicxman"]
   end
 

@@ -123,6 +123,26 @@ module Minecraft
       File.open("#{var}.json", "w") { |f| f.print instance_variable_get("@#{var}").to_json }
     end
 
+    # Process command history addition.
+    #
+    # @param [String] user The user executing the command.
+    # @param [String] command The command to potetentially add to history.
+    # @param [Array] args Command arguments.
+    # @example
+    #   process_history_addition("basicxman", "give", "cobblestone")
+    #   process_history_addition("basicxman", "history")
+    def process_history_addition(user, command, args)
+      blacklist = %w( last history s )
+      return if blacklist.include? command.to_s
+
+      history = [command] + args
+      u = user.downcase
+
+      @command_history[u] ||= []
+      return if @command_history[u].last == history
+      @command_history[u] << history
+    end
+
     # Complicated method to decide the logic of calling a command.  Checks
     # if the command requires op privileges and whether an `all` version is
     # available and has been requested.
@@ -140,11 +160,7 @@ module Minecraft
     # @example
     #   call_command("basicxman", "give", "cobblestone", "64")
     def call_command(user, command, *args)
-      unless ["last", "history"].include? command.to_s
-        @command_history[user.downcase] ||= []
-        @command_history[user.downcase] << [command] + args
-      end
-
+      process_history_addition(user, command, args)
       is_all = command.to_s.end_with? "all"
       root   = command.to_s.chomp("all").to_sym
       return send(root, user, *args) unless @commands.include? root

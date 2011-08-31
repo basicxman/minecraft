@@ -704,8 +704,12 @@ module Minecraft
       end
 
       command = @command_history[user][-history]
+      t = @command_history[user].length
       call_command(user, command.first, *command[1..-1])
-      @command_history[user].slice! -1
+
+      # process_history_addition() will not add the same command twice in a
+      # row, so only slice if the command history length has changed.
+      @command_history[user].slice! -1 unless @command_history[user].length == t
     end
 
     # Prints the last three commands executed.
