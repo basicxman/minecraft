@@ -320,7 +320,7 @@ module Minecraft
       return if meta_check(line)
 
       # :foo should use the shortcut 'foo'.
-      line.gsub!(/^(\<.*?\>\s+):/) { |m| "#{$1}!s " }
+      line.gsub!(/^(\<.*?\>\s+),/) { |m| "#{$1}!s " }
 
       match_data = line.match /^\<(.*?)\>\s+!(.*?)$/
       return if match_data.nil?
