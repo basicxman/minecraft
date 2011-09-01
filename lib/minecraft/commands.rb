@@ -365,7 +365,13 @@ module Minecraft
     # @note all: is putting out.
     def give(user, *args)
       item, quantity = items_arg(1, args)
-      item = resolve_item(item)
+      # For coloured wools/dyes.
+      if WOOL_COLOURS.include? item
+        (quantity / 64.0).ceil.times { kit(user, item) }
+        item = 35
+      else
+        item = resolve_item(item)
+      end
 
       construct_give(user, item, quantity)
     end
@@ -645,7 +651,7 @@ module Minecraft
     #   kitlist()
     # @note ops: none
     def kitlist()
-      @server.puts "say Kits: #{KITS.keys.join(", ")}"
+      say("Kits: #{KITS.keys.join(", ")}")
     end
 
     # Adds or prints the current todo list items.

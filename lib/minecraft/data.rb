@@ -6,6 +6,7 @@ module Minecraft
       :diamond    => [276, 277, 278, 279, 293],
       :goldarmour => [314, 315, 316, 317],
       :armour     => [310, 311, 312, 313],
+      :tools      => [277, 278],
       :ranged     => [261, [262, 320]],
       :nether     => [261, [262, 320], [89, 128], 278, 276],
       :portal     => [[49, 14], 259],
@@ -15,8 +16,40 @@ module Minecraft
       :blacksmith => [61, [263, 16], [264, 3], [265, 32], [266, 16]],
       :miner      => [278, [50, 64], 277, [65, 64]],
       :farmer     => [293, [295, 128], 277],
-      :chef       => [[297, 3], [296, 192], [320, 3], 357, [353, 64], 354, [350, 2]]
+      :chef       => [[297, 3], [296, 192], [320, 3], 357, [353, 64], 354, [350, 2]],
+      :lightgray  => [[351, 64], [352, 64]],
+      :gray       => [[351, 64], [352, 64]],
+      :black      => [[351, 64]],
+      :red        => [[38, 64]],
+      :orange     => [[38, 64], [37, 64]],
+      :yellow     => [[37, 64]],
+      :lime       => [[352, 64], [81, 64]],
+      :green      => [[81, 64]],
+      :lightblue  => [[352, 64], [22, 64]],
+      :cyan       => [[22, 64], [81, 64]],
+      :blue       => [[22, 64]],
+      :purple     => [[22, 64], [38, 64]],
+      :magenta    => [[22, 64], [38, 64], [38, 64], [352, 64]],
+      :pink       => [[352, 64], [38, 64]]
     }
+
+    # Possible wool colours.
+    WOOL_COLOURS = %w(
+      lightgray
+      gray
+      black
+      red
+      orange
+      yellow
+      lime
+      green
+      lightblue
+      cyan
+      blue
+      purple
+      magenta
+      pink
+    )
 
     # Values for time, 0 to 24000.  0 is dawn, 12000 is dusk.
     TIME = {

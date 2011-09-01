@@ -81,6 +81,15 @@ eof
     assert_equal result, @server.string
   end
 
+  sandbox_test "give command should give kits for wools" do
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.hops = ["basicxman"]
+    @ext.call_command("basicxman", "give", "lightgray", "2m")
+    t = @ext.server.string.gsub("\n", " ")
+    assert_match "give basicxman 35 64", t
+    assert_match "give basicxman 351", t
+  end
+
   # User points system testing.
   sandbox_test "should give a user points" do
     @ext = Minecraft::Extensions.new(StringIO.new, {})
