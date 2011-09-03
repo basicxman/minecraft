@@ -44,7 +44,7 @@ module Minecraft
       @enums = [ :ops ]
       commands.each do |sym|
         next if sym.to_s.end_with? "all"
-        meth  = method(sym)
+        meth = method(sym)
         src_b, src_e = get_comment_range(meth.source_location.last)
 
         @commands[sym] = {
@@ -78,7 +78,7 @@ module Minecraft
 
         if line.index("@note") == 0
           key, value = line[6..-1].split(": ")
-          @commands[sym][key.to_sym] = @enums.include?(key.to_sym) ? value.to_sym : value
+          @commands[sym][key.to_sym] = @enums.include?(key.to_sym) ? value.to_sym : value == "false" ? false : value == "true" ? true : value
         end
       end
     end
@@ -176,7 +176,7 @@ module Minecraft
         return unless send("validate_" + root.to_s, *args)
       end
 
-      is_all = @commands[root][:all] if is_all
+      is_all = !@commands[root][:all].nil? if is_all
       rest_param = @commands[root][:params].count { |a| a.first == :rest }
       reg_params = @commands[root][:params].count { |a| a.last != :user }
 
@@ -213,15 +213,15 @@ module Minecraft
       params = @commands[command.to_sym][:params][1..-1].map { |a| [a[0], a[1].to_s.gsub("_", " ")] }
       return unless args.length < reg_params
 
-      return @server.puts "say Expected at least one argument." if rest_param == 1
+      return say("Expected at least one argument.") if rest_param == 1
       req_params = params.count { |a| a.first == :req }
       if args.length < req_params
         args.length.times { params.slice! 0 }
         if params.length == 1
-          return @server.puts "say Expected the argument '#{params[0][1]}'"
+          return say("Expected the argument '#{params[0][1]}'")
         else
           temp = params.map { |a| "'#{a[1]}'" }
-          return @server.pust "say Expected additional arguments, #{temp.join(", ")}"
+          return say("Expected additional arguments, #{temp.join(", ")}")
         end
       end
     end
@@ -411,7 +411,7 @@ module Minecraft
       time_spent = calculate_uptime(user)
       @userlog[user] ||= 0
       @userlog[user] += time_spent
-      @server.puts "say #{user} spent #{format_uptime(time_spent)} minutes in the server, totalling to #{format_uptime(@userlog[user])}."
+      say("#{user} spent #{format_uptime(time_spent)} minutes in the server, totalling to #{format_uptime(@userlog[user])}.")
       save_file :userlog
     end
 
@@ -475,7 +475,7 @@ module Minecraft
     # @return [Boolean] Returns true if the user is an op.
     def validate_ops(user, command, message = true)
       return true if is_op? user.downcase
-      @server.puts "say #{user} is not an op, cannot use !#{command}." if message
+      say("#{user} is not an op, cannot use !#{command}.") if message
     end
 
     # Check if a user has half op privileges and print a privilege error if not.
@@ -485,7 +485,7 @@ module Minecraft
     # @return [Boolean] Returns true if the user is an op.
     def validate_hops(user, command, message = true)
       return true if is_hop? user.downcase
-      @server.puts "say #{user} is not a half-op, cannot use !#{command}." if message
+      say("#{user} is not a half-op, cannot use !#{command}.") if message
     end
 
     # An error message for invalid commands.

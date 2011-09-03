@@ -143,7 +143,7 @@ module Minecraft
         @server.puts "say Disco ends."
         @disco = false
       else
-        @server.puts "say #{user} has requested disco, s/he likely can't actually dance."
+        say("#{user} has requested disco, s/he likely can't actually dance.")
         @disco = true
       end
     end
@@ -157,10 +157,10 @@ module Minecraft
     def dnd(user)
       user.downcase!
       if @userdnd.include? user
-        @server.puts "say #{user} is ready to be disturbed. *cough*"
+        say("#{user} is ready to be disturbed. *cough*")
         @userdnd.reject! { |u| u == user }
       else
-        @server.puts "say #{user} does not wish to be disturbed."
+        say("#{user} does not wish to be disturbed.")
         @userdnd << user
       end
     end
@@ -173,7 +173,7 @@ module Minecraft
     #   disturb("basicxman", "mike_n_7")
     # @note ops: op
     def disturb(user, target_user)
-      @server.puts "say #{target_user} is being disturbed by #{user}!"
+      say("#{target_user} is being disturbed by #{user}!")
       @userdnd.reject! { |u| u == target_user.downcase }
     end
 
@@ -201,7 +201,7 @@ module Minecraft
       target_user = target_user.downcase
       num_points = num_points.to_i
       if user.downcase == target_user
-        @server.puts "say Did you just try to give yourself points? Sure, minus twenty."
+        say("Did you just try to give yourself points? Sure, minus twenty.")
         @userpoints[target_user] ||= 0
         @userpoints[target_user] -= 20
         return
@@ -214,7 +214,7 @@ module Minecraft
       num_points = [num_points, cap_points(user)].min
       @userpoints[target_user] ||= 0
       @userpoints[target_user] += num_points
-      @server.puts "say #{user} has given #{target_user} #{num_points} points for a total of #{@userpoints[target_user]}."
+      say("#{user} has given #{target_user} #{num_points} points for a total of #{@userpoints[target_user]}.")
     end
 
     # Checks a users points or displays the leaderboard.
@@ -268,8 +268,8 @@ module Minecraft
           :start => Time.now
         }
         @last_kick_vote = target_user
-        @server.puts "say A kickvote has been initiated for #{target_user}."
-        @server.puts "say To vote enter !kickvote #{target_user}."
+        say("A kickvote has been initiated for #{target_user}.")
+        say("To vote enter !kickvote #{target_user}.")
       end
     end
 
@@ -295,9 +295,9 @@ module Minecraft
     def cancelvote(user, target_user)
       if @kickvotes.has_key? target_user
         @kickvotes.delete(target_user)
-        @server.puts "say #{user} has cancelled the kickvote on #{target_user}."
+        say("#{user} has cancelled the kickvote on #{target_user}.")
       else
-        @server.puts "say There is no kickvote against #{target_user} dummy."
+        say("There is no kickvote against #{target_user} dummy.")
       end
     end
 
@@ -309,7 +309,7 @@ module Minecraft
     # @note ops: op
     def kickvotes(user)
       @kickvotes.each do |target_user, data|
-        @server.puts "say #{target_user}: #{data[:tally]} #{data[:votes].map { |u| u[0] + u[-1] }.join(", ")}"
+        say("#{target_user}: #{data[:tally]} #{data[:votes]}")
       end
     end
 
@@ -323,7 +323,7 @@ module Minecraft
     def roulette(user)
       users = @users + [user] * 3
       picked_user = users.sample
-      @server.puts "say #{user} has requested a roulette kick, s/he has a higher chance of being kicked."
+      say("#{user} has requested a roulette kick, s/he has a higher chance of being kicked.")
       @server.puts "kick #{picked_user}"
     end
 
@@ -450,11 +450,9 @@ module Minecraft
     # @note ops: op
     def property(user, key = nil)
       if key.nil?
-        (@server_properties.length / 3.0).ceil.times do |n|
-          @server.puts "say #{@server_properties.keys[n * 3, 3].join(", ")}"
-        end
+        say(@server_properties.keys.join(", "))
       else
-        @server.puts "say #{key} is currently #{@server_properties[key]}" if @server_properties.include? key
+        say ("#{key} is currently #{@server_properties[key]}") if @server_properties.include? key
       end
     end
 
@@ -472,9 +470,9 @@ module Minecraft
       target_user ||= user
       unless @users.include? target_user
         if @userlog.has_key? target_user
-          @server.puts "say #{target_user} has #{format_uptime(@userlog[target_user])} minutes of logged time."
+          say("#{target_user} has #{format_uptime(@userlog[target_user])} minutes of logged time.")
         else
-          @server.puts "say #{target_user} Does not exist."
+          say("#{target_user} Does not exist.")
         end
         return
       end
@@ -483,7 +481,7 @@ module Minecraft
       if @userlog.has_key? target_user
         total = "  Out of a total of #{format_uptime(@userlog[target_user] + time_spent)} minutes."
       end
-      @server.puts "say #{target_user} has been online for #{format_uptime(time_spent)} minutes.#{total}"
+      say("#{target_user} has been online for #{format_uptime(time_spent)} minutes.#{total}")
     end
 
     # Will print the server rules to all connected players.
@@ -492,7 +490,7 @@ module Minecraft
     #   rules()
     # @note ops: none
     def rules()
-      @server.puts "say #{@rules}"
+      say(@rules)
     end
 
     # Lists the currently connecting players, noting which is the requesting
@@ -514,7 +512,7 @@ module Minecraft
         s + "#{", " unless s.empty?}#{pre}#{u}#{suf}"
       end
 
-      @server.puts "say #{l}"
+      say(l)
     end
 
     # Adds a timer to the requesting users timers, the item and frequency in
@@ -534,7 +532,7 @@ module Minecraft
       return @server.puts "say Timer was not added." if item.nil?
       @timers[user] ||= {}
       @timers[user][item] = duration
-      @server.puts "say Timer added for #{user}.  Giving item id #{item} every #{duration} seconds."
+      say("Timer added for #{user}.  Giving item id #{item} every #{duration} seconds.")
     end
 
     # Deletes a timer from the requesting user.
@@ -596,7 +594,7 @@ module Minecraft
       if args.length == 0
         unless @shortcuts.has_key? user and @shortcuts[user].has_key? shortcut_name
           return kit(user, shortcut_name) if KITS.include? shortcut_name.to_sym
-          @server.puts "say #{shortcut_name} is not a valid shortcut for #{user}."
+          say("#{shortcut_name} is not a valid shortcut for #{user}.")
         end
         return call_command(user, @shortcuts[user][shortcut_name].first, *@shortcuts[user][shortcut_name][1..-1]) if args.length == 0
       end
@@ -604,7 +602,7 @@ module Minecraft
       command_string = args
       @shortcuts[user] ||= {}
       @shortcuts[user][shortcut_name] = command_string
-      @server.puts "say Shortcut labelled #{shortcut_name} for #{user} has been added."
+      say("Shortcut labelled #{shortcut_name} for #{user} has been added.")
     end
 
     # Prints the requested users shortcuts.
@@ -615,7 +613,7 @@ module Minecraft
     # @note ops: hop
     def shortcuts(user)
       labels = @shortcuts[user].keys.join(", ") if @shortcuts.has_key? user
-      @server.puts "say Shortcuts for #{user}: #{labels}."
+      say("Shortcuts for #{user}: #{labels}.")
     end
 
     # Prints the available commands for the user.

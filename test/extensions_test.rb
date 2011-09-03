@@ -48,7 +48,7 @@ class ExtensionsTest < Test
     @ext.users = ["basicxman", "blizzard4U", "mike_n_7"]
     @ext.ops = ["basicxman"]
     @ext.call_command("basicxman", "rouletteall")
-    assert_equal 2, @ext.server.string.split("\n").length
+    refute_match "basicxman is", @ext.server.string.gsub("\n", "")
   end
 
   sandbox_test "should let ops execute an all command" do
