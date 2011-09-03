@@ -182,7 +182,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   printdnd()
-    # @note: ops: op
+    # @note ops: op
     def printdnd()
       @server.puts "say #{@userdnd.join(", ")}"
     end
@@ -262,7 +262,7 @@ module Minecraft
       return @server.puts "say No user #{target_user} exists." unless @users.include? target_user
       return vote(user) if target_user.nil?
       unless submit_vote(user, target_user)
-        @kickvotes[target_user] = {
+        @userkickvotes[target_user] = {
           :tally => kick_influence(user),
           :votes => [user],
           :start => Time.now
@@ -293,8 +293,8 @@ module Minecraft
     #   cancelvote("basicxman", "blizzard4U")
     # @note ops: op
     def cancelvote(user, target_user)
-      if @kickvotes.has_key? target_user
-        @kickvotes.delete(target_user)
+      if @userkickvotes.has_key? target_user
+        @userkickvotes.delete(target_user)
         say("#{user} has cancelled the kickvote on #{target_user}.")
       else
         say("There is no kickvote against #{target_user} dummy.")
@@ -308,7 +308,7 @@ module Minecraft
     #   kickvotes("basicxman")
     # @note ops: op
     def kickvotes(user)
-      @kickvotes.each do |target_user, data|
+      @userkickvotes.each do |target_user, data|
         say("#{target_user}: #{data[:tally]} #{data[:votes]}")
       end
     end
@@ -592,16 +592,16 @@ module Minecraft
     def s(user, *args)
       shortcut_name = args.slice! 0
       if args.length == 0
-        unless @shortcuts.has_key? user and @shortcuts[user].has_key? shortcut_name
+        unless @usershortcuts.has_key? user and @usershortcuts[user].has_key? shortcut_name
           return kit(user, shortcut_name) if KITS.include? shortcut_name.to_sym
-          say("#{shortcut_name} is not a valid shortcut for #{user}.")
+          return say("#{shortcut_name} is not a valid shortcut for #{user}.")
         end
-        return call_command(user, @shortcuts[user][shortcut_name].first, *@shortcuts[user][shortcut_name][1..-1]) if args.length == 0
+        return call_command(user, @usershortcuts[user][shortcut_name].first, *@usershortcuts[user][shortcut_name][1..-1]) if args.length == 0
       end
 
       command_string = args
-      @shortcuts[user] ||= {}
-      @shortcuts[user][shortcut_name] = command_string
+      @usershortcuts[user] ||= {}
+      @usershortcuts[user][shortcut_name] = command_string
       say("Shortcut labelled #{shortcut_name} for #{user} has been added.")
     end
 
@@ -612,7 +612,7 @@ module Minecraft
     #   shortcuts("basicxman")
     # @note ops: hop
     def shortcuts(user)
-      labels = @shortcuts[user].keys.join(", ") if @shortcuts.has_key? user
+      labels = @usershortcuts[user].keys.join(", ") if @usershortcuts.has_key? user
       say("Shortcuts for #{user}: #{labels}.")
     end
 
@@ -732,6 +732,14 @@ module Minecraft
       end
     end
 
+    # Validates a kit group, if the kit cannot be found it executes the
+    # !kitlist command.
+    def validate_kit(group = "")
+      return true if KITS.include? group.to_sym
+      @server.puts "say #{group} is not a valid kit."
+      kitlist
+    end
+
     private
 
     # Prints the command signature options for a specified command.
@@ -787,14 +795,6 @@ module Minecraft
       end
     end
 
-    # Validates a kit group, if the kit cannot be found it executes the
-    # !kitlist command.
-    def validate_kit(group = "")
-      return true if KITS.include? group.to_sym
-      @server.puts "say #{group} is not a valid kit."
-      kitlist
-    end
-
     # Changes the time of day.
     #
     # @param [String] time The time of day to change it to.
@@ -814,10 +814,10 @@ module Minecraft
     # @example
     #   check_kickvote("blizzard4U")
     def check_kickvote(user)
-      if @kickvotes[user][:tally] >= @vote_threshold
+      if @userkickvotes[user][:tally] >= @vote_threshold
         @server.puts "say Enough votes have been given to kick #{user}."
         @server.puts "kick #{user}"
-        @kickvotes.delete(user)
+        @userkickvotes.delete(user)
       end
     end
 
@@ -835,10 +835,10 @@ module Minecraft
 
     # Checks to see if any kickvotes are expired.
     def expire_kickvotes
-      @kickvotes.each do |target_user, data|
+      @userkickvotes.each do |target_user, data|
         if Time.now > data[:start] + @vote_expiration
           @server.puts "say The kickvote for #{target_user} has expired."
-          @kickvotes.delete(target_user)
+          @userkickvotes.delete(target_user)
         end
       end
     end
@@ -852,12 +852,12 @@ module Minecraft
     #   submit_vote("basicxman", "blizzard4U")
     def submit_vote(user, target_user)
       return unless @users.include? target_user
-      if @kickvotes.has_key? target_user
-        if @kickvotes[target_user][:votes].include? user
+      if @userkickvotes.has_key? target_user
+        if @userkickvotes[target_user][:votes].include? user
           @server.puts "say You have already voted."
         else
-          @kickvotes[target_user][:votes] << user
-          @kickvotes[target_user][:tally] += kick_influence(user)
+          @userkickvotes[target_user][:votes] << user
+          @userkickvotes[target_user][:tally] += kick_influence(user)
           check_kickvote(target_user)
         end
         return true

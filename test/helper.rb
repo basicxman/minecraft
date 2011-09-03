@@ -10,7 +10,7 @@ require "turn"
 
 module Minecraft
   class Extensions
-    attr_accessor :commands, :users, :ops, :hops, :counter, :server, :kickvotes, :last_kick_vote, :uptime, :timers, :shortcuts, :userlog, :userpoints, :vote_threshold, :userdnd, :welcome_message, :memos, :todo_items, :command_history
+    attr_accessor :commands, :users, :ops, :hops, :counter, :server, :userkickvotes, :last_kick_vote, :useruptime, :timers, :usershortcuts, :userlog, :userpoints, :vote_threshold, :userdnd, :welcome_message, :memos, :todo_items, :command_history
   end
 end
 
@@ -33,5 +33,33 @@ class Test < MiniTest::Unit::TestCase
       end
     end
     define_method("test_#{name.gsub(/\W/, '_')}", p)
+  end
+
+  def ext(opts = {})
+    @ext = Minecraft::Extensions.new(StringIO.new, {})
+    @ext.ops  = opts[:ops]  || []
+    @ext.hops = opts[:hops] || []
+    @ext.users = @ext.ops + @ext.hops + (opts[:users] || [])
+    @ext.users.uniq!
+  end
+
+  def call(string)
+    @ext.call_command(*string.split(" "))
+  end
+
+  def output
+    @ext.server.string
+  end
+
+  def output_lines
+    output.split("\n")
+  end
+
+  def output_line
+    output.gsub("\n", "")
+  end
+
+  def clear
+    @ext.server.string = ""
   end
 end

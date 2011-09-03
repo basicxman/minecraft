@@ -13,9 +13,9 @@ module Minecraft
     def initialize(server, opts)
       @ops = File.readlines("ops.txt").map { |s| s.chomp } if File.exists? "ops.txt"
       get_json :hops, []
-      get_json :uptime
+      get_json :useruptime
       get_json :timers
-      get_json :shortcuts
+      get_json :usershortcuts
       get_json :userlog
       get_json :userpoints
       get_json :userdnd, []
@@ -26,7 +26,7 @@ module Minecraft
       @counter = 0
       @logon_time = {}
       @server = server
-      @kickvotes = {}
+      @userkickvotes = {}
       @last_kick_vote = nil
       load_server_properties
 
@@ -40,7 +40,7 @@ module Minecraft
       # Initialize the set of commands.
       @commands = {}
       commands = Minecraft::Commands.public_instance_methods
-      @command_info = File.read(method(commands.first).source_location.first).split("\n")
+      @command_info = File.read(method(commands.first).source_location.first).split(/$/)
       @enums = [ :ops ]
       commands.each do |sym|
         next if sym.to_s.end_with? "all"
@@ -49,10 +49,10 @@ module Minecraft
 
         @commands[sym] = {
           :help => "",
-          :ops => :none,
           :params => meth.parameters
         }
         parse_comments(src_b, src_e, sym)
+        @commands.delete sym if @commands[sym][:ops].nil?
       end
     end
 
@@ -78,7 +78,7 @@ module Minecraft
 
         if line.index("@note") == 0
           key, value = line[6..-1].split(": ")
-          @commands[sym][key.to_sym] = @enums.include?(key.to_sym) ? value.to_sym : value == "false" ? false : value == "true" ? true : value
+          @commands[sym][key.to_sym] = @enums.include?(key.to_sym) ? value.to_sym : value
         end
       end
     end
@@ -105,7 +105,7 @@ module Minecraft
     # Save instance variables to their respective JSON files.
     def save
       save_file :timers
-      save_file :shortcuts
+      save_file :usershortcuts
       save_file :hops
       save_file :userpoints
       save_file :userdnd
