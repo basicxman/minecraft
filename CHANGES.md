@@ -1,3 +1,11 @@
+0.3.3 (2011-09-03)
+------------------
+
+* Refactored tests.
+* Word wrapped more commands (should be all long outputs now).
+* Source file reading bug fixed.
+* Fixed an `all` style command bug.
+
 0.3.2 (2011-08-31)
 ------------------
 
