@@ -4,6 +4,31 @@ module Minecraft
   module Commands
     include Data
 
+    # Switch to creative mode.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] target_user The target user.
+    # @example
+    #   creative("basicxman")
+    # @note ops: op
+    def creative(user, target_user = nil)
+      target_user = user if target_user.nil?
+      puts target_user
+      @server.puts "gamemode #{target_user} 1"
+    end
+
+    # Switch to normal mode.
+    #
+    # @param [String] user The requesting user.
+    # @param [String] target_user The targetuser.
+    # @example
+    #   normal("basicxman")
+    # @note ops: op
+    def normal(user, target_user = nil)
+      target_user = user if target_user.nil?
+      @server.puts "gamemode #{target_user} 0"
+    end
+
     # Allows a user to specify a periodic (once every ten seconds) time change.
     #
     # @param [String] user The requesting user.

@@ -477,6 +477,25 @@ eof
     assert_match "diamond", output_line
   end
 
+  # Game modes
+  sandbox_test "should switch to normal and creative mode" do
+    ext :ops => ["basicxman"], :users => ["Ian_zers"]
+    call "basicxman creative"
+    assert_match "gamemode basicxman 1", output_line
+    clear
+
+    call "basicxman normal"
+    assert_match "gamemode basicxman 0", output_line
+    clear
+
+    call "basicxman creative Ian_zers"
+    assert_match "gamemode Ian_zers 1", output_line
+    clear
+
+    call "basicxman normal Ian_zers"
+    assert_match "gamemode Ian_zers 0", output_line
+  end
+
   # Remaining commands testing (should test to ensure no errors are thrown in
   # the command execution).
   sandbox_test "should run commands without failure" do
