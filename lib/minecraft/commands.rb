@@ -664,7 +664,7 @@ module Minecraft
         else
           priv == :none ? arr << key : arr
         end
-      }.map { |s| "!" + s.to_s }
+      }.sort.map { |s| "!" + s.to_s }
       say(commands.join(", "))
     end
 
