@@ -305,7 +305,6 @@ module Minecraft
     # @note ops: none
     # @return [void]
     def kickvote(user, target_user = nil)
-      return @server.puts "say No user #{target_user} exists." unless @users.include? target_user
       return vote(user) if target_user.nil?
       return if submit_vote(user, target_user)
 
