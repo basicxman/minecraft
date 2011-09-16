@@ -370,7 +370,7 @@ module Minecraft
     #   dehop("basicxman", "blizzard4U")
     # @note ops: op
     def dehop(user, target_user)
-      @hops.reject! { |u| u == target_user.downcase }
+      @hops.delete target_user.downcase
       @server.puts "#{target_user} has been de-hoped, thanks #{user}!"
     end
 
