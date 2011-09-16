@@ -172,6 +172,16 @@ eof
     assert_match "kick Ian_zers", output
   end
 
+  sandbox_test "should vote for a running kickvote if no target is given" do
+    ext :ops => ["basicxman"], :hops => ["mike_n_7"], :users => ["blizzard4U", "Ian_zers"]
+    call "basicxman kickvote blizzard4U"
+    assert_equal 3, @ext.userkickvotes["blizzard4U"][:tally]
+
+    call "Ian_zers kickvote"
+    assert_equal 4, @ext.userkickvotes["blizzard4U"][:tally]
+    assert_equal "blizzard4U", @ext.last_kick_vote
+  end
+
   # Timer test.
   sandbox_test "should not add a timer if the item does not exist" do
     ext :hops => ["basicxman"]
