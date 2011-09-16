@@ -11,8 +11,7 @@ module Minecraft
     # @example
     #   creative("basicxman")
     # @note ops: op
-    def creative(user, target_user = nil)
-      target_user = user if target_user.nil?
+    def creative(user, target_user = user)
       puts target_user
       @server.puts "gamemode #{target_user} 1"
     end
@@ -24,8 +23,7 @@ module Minecraft
     # @example
     #   normal("basicxman")
     # @note ops: op
-    def normal(user, target_user = nil)
-      target_user = user if target_user.nil?
+    def normal(user, target_user = user)
       @server.puts "gamemode #{target_user} 0"
     end
 
@@ -491,8 +489,7 @@ module Minecraft
     #   uptime("basicxman")
     #   uptime("basicxman", "mike_n_7")
     # @note ops: none
-    def uptime(user, target_user = nil)
-      target_user ||= user
+    def uptime(user, target_user = user)
       unless @users.include? target_user
         if @userlog.has_key? target_user
           say("#{target_user} has #{format_uptime(@userlog[target_user])} minutes of logged time.")
