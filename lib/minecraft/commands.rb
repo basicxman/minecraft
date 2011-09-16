@@ -523,7 +523,7 @@ module Minecraft
     #   list("basicxman")
     # @note ops: none
     def list(user)
-      l = @users.inject("") do |s, u|
+      l = @users.map { |u|
         pre, suf = "", ""
         if u == user
           pre = "["
@@ -531,8 +531,9 @@ module Minecraft
         end
         pre = pre + "@" if is_op? u
         pre = pre + "%" if is_hop? u
-        s + "#{", " unless s.empty?}#{pre}#{u}#{suf}"
-      end
+
+        pre + u + suf
+      }.join(", ")
 
       say(l)
     end
