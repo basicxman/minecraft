@@ -11,7 +11,7 @@ module Minecraft
     # @example
     #   creative("basicxman")
     # @return [void]
-    # @note ops: op
+    # @level op
     def creative(user, target_user = nil)
       target_user = user if target_user.nil?
       puts target_user
@@ -25,7 +25,7 @@ module Minecraft
     # @example
     #   normal("basicxman")
     # @return [void]
-    # @note ops: op
+    # @level op
     def normal(user, target_user = nil)
       target_user = user if target_user.nil?
       @server.puts "gamemode #{target_user} 0"
@@ -40,7 +40,7 @@ module Minecraft
     #   warptime("basicxman", "5")
     #   warptime("basicxman")
     # @return [void]
-    # @note ops: op
+    # @level op
     def warptime(user, time_change = nil)
       if time_change.nil?
         return @server.puts "say Current rate: #{@time_change} every ten seconds." if @time_change
@@ -64,7 +64,7 @@ module Minecraft
     # @example
     #   memo("basicxman", "mike_n_7", "Hi!")
     # @return [void]
-    # @note ops: none
+    # @level none
     def memo(user, target_user, *args)
       target_user = target_user.downcase
       if @memos.has_key? target_user and @memos[target_user].length == 5
@@ -82,7 +82,7 @@ module Minecraft
     # @example
     #   stop("basicxman")
     # @return [void]
-    # @note ops: hop
+    # @level hop
     def stop(user)
       @timers.delete user
       @server.puts "say #{user} has stopped all his/her timers."
@@ -96,7 +96,7 @@ module Minecraft
     #   welcome("basicxman", "Welcome", "to", "the", "server")
     #   welcome("basicxman", "+", "%")
     # @return [void]
-    # @note ops: op
+    # @level op
     def welcome(user, *args)
       if args.first == "+"
         @welcome_message += " " + args[1..-1].join(" ")
@@ -112,7 +112,7 @@ module Minecraft
     #
     # @example
     #   dawn()
-    # @note ops: op
+    # @level op
     # @return [void]
     def dawn()
       change_time(:dawn)
@@ -122,7 +122,7 @@ module Minecraft
     #
     # @example
     #   dusk()
-    # @note ops: op
+    # @level op
     # @return [void]
     def dusk()
       change_time(:dusk)
@@ -132,7 +132,7 @@ module Minecraft
     #
     # @example
     #   day()
-    # @note ops: op
+    # @level op
     # @return [void]
     def day()
       change_time(:day)
@@ -142,7 +142,7 @@ module Minecraft
     #
     # @example
     #   night()
-    # @note ops: op
+    # @level op
     # @return [void]
     def night()
       change_time(:night)
@@ -152,7 +152,7 @@ module Minecraft
     #
     # @example
     #   morning()
-    # @note ops: op
+    # @level op
     # @return [void]
     def morning()
       change_time(:morning)
@@ -162,7 +162,7 @@ module Minecraft
     #
     # @example
     #   evening()
-    # @note ops: op
+    # @level op
     # @return [void]
     def evening()
       change_time(:evening)
@@ -173,7 +173,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   disco("basicxman")
-    # @note ops: op
+    # @level op
     # @return [void]
     def disco(user)
       @disco ||= false
@@ -191,7 +191,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   dnd("basicxman")
-    # @note ops: none
+    # @level none
     # @return [void]
     def dnd(user)
       user.downcase!
@@ -210,7 +210,7 @@ module Minecraft
     # @param [String] target_user The target user.
     # @example
     #   disturb("basicxman", "mike_n_7")
-    # @note ops: op
+    # @level op
     # @return [void]
     def disturb(user, target_user)
       say("#{target_user} is being disturbed by #{user}!")
@@ -222,7 +222,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   printdnd()
-    # @note ops: op
+    # @level op
     # @return [void]
     def printdnd()
       @server.puts "say #{@userdnd.join(", ")}"
@@ -237,7 +237,7 @@ module Minecraft
     # @example
     #   points("basicxman", "mike_n_7")
     #   points("basicxman", "mike_n_7", "50")
-    # @note ops: none
+    # @level none
     # @return [void]
     def points(user, target_user, num_points = 1)
       target_user = target_user.downcase
@@ -266,7 +266,7 @@ module Minecraft
     # @example
     #   board("basicxman")
     #   board("basicxman", "mike_n_7")
-    # @note ops: none
+    # @level none
     # @return [void]
     def board(user, target_user = nil)
       if target_user.nil?
@@ -300,7 +300,7 @@ module Minecraft
     # @example
     #   kickvote("basicxman", "blizzard4U")
     #   kickvote("basicxman")
-    # @note ops: none
+    # @level none
     # @return [void]
     def kickvote(user, target_user = nil)
       return @server.puts "say No user #{target_user} exists." unless @users.include? target_user
@@ -322,7 +322,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   vote("basicxman")
-    # @note ops: none
+    # @level none
     # @return [void]
     def vote(user)
       unless submit_vote(user, @last_kick_vote)
@@ -336,7 +336,7 @@ module Minecraft
     # @param [String] target_user The user which currently has a kickvote.
     # @example
     #   cancelvote("basicxman", "blizzard4U")
-    # @note ops: op
+    # @level op
     # @return [void]
     def cancelvote(user, target_user)
       if @userkickvotes.has_key? target_user
@@ -352,7 +352,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   kickvotes("basicxman")
-    # @note ops: op
+    # @level op
     # @return [void]
     def kickvotes(user)
       @userkickvotes.each do |target_user, data|
@@ -366,7 +366,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   roulette("basicxman")
-    # @note ops: op
+    # @level op
     # @return [void]
     def roulette(user)
       users = @users + [user] * 3
@@ -381,7 +381,7 @@ module Minecraft
     # @param [String] target_user The target user to be hop'ed.
     # @example
     #   hop("basicxman", "blizzard4U")
-    # @note ops: op
+    # @level op
     # @return [void]
     def hop(user, target_user)
       @hops << target_user.downcase unless @hops.include? target_user.downcase
@@ -394,7 +394,7 @@ module Minecraft
     # @param [String] target_user The target user to be de-hop'ed.
     # @example
     #   dehop("basicxman", "blizzard4U")
-    # @note ops: op
+    # @level op
     # @return [void]
     def dehop(user, target_user)
       @hops.reject! { |u| u == target_user.downcase }
@@ -411,7 +411,7 @@ module Minecraft
     #   give("basicxman", "cobblestone", "9m")
     #   give("basicxman", "flint", "and", "steel", "1")
     #   give("basicxman", "4")
-    # @note ops: hop
+    # @level hop
     # @note all: is putting out.
     # @return [void]
     def give(user, *args)
@@ -434,7 +434,7 @@ module Minecraft
     # @param [String] group Label of the kit.
     # @example
     #   give("basicxman", "diamond")
-    # @note ops: hop
+    # @level hop
     # @note all: is providing kits to all.
     # @return [void]
     def kit(user, group)
@@ -453,7 +453,7 @@ module Minecraft
     # @param [String] target User to teleport to.
     # @example
     #   tp("basicxman", "mike_n_7")
-    # @note ops: hop
+    # @level hop
     # @note all: is teleporting all users to their location.
     # @return [void]
     def tp(user, target)
@@ -476,7 +476,7 @@ module Minecraft
     # @param [String] user Target user.
     # @example
     #   nom("basicxman")
-    # @note ops: hop
+    # @level hop
     # @note all: is providing noms to all.
     # @return [void]
     def nom(user)
@@ -489,7 +489,7 @@ module Minecraft
     # @param args noms!
     # @example
     #   om("basicxman", "nom", "nom", "nom")
-    # @note ops: hop
+    # @level hop
     # @note all: is noming everybody, gross.
     # @return [void]
     def om(user, *args)
@@ -503,7 +503,7 @@ module Minecraft
     # @example
     #   property("basicxman", "spawn-monsters")
     #   property("basicxman")
-    # @note ops: op
+    # @level op
     # @return [void]
     def property(user, key = nil)
       if key.nil?
@@ -522,7 +522,7 @@ module Minecraft
     # @example
     #   uptime("basicxman")
     #   uptime("basicxman", "mike_n_7")
-    # @note ops: none
+    # @level none
     # @return [void]
     def uptime(user, target_user = nil)
       target_user ||= user
@@ -546,7 +546,7 @@ module Minecraft
     #
     # @example
     #   rules()
-    # @note ops: none
+    # @level none
     # @return [void]
     def rules()
       say(@rules)
@@ -558,7 +558,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   list("basicxman")
-    # @note ops: none
+    # @level none
     # @return [void]
     def list(user)
       l = @users.inject("") do |s, u|
@@ -585,7 +585,7 @@ module Minecraft
     # @example
     #   addtimer("basicxman", "cobblestone")
     #   addtimer("basicxman", "arrow", "10")
-    # @note ops: hop
+    # @level hop
     # @return [void]
     def addtimer(user, *args)
       item, duration = items_arg(30, args)
@@ -602,7 +602,7 @@ module Minecraft
     # @param args item
     # @example
     #   deltimer("basicxman", "cobblestone")
-    # @note ops: hop
+    # @level hop
     # @return [void]
     def deltimer(user, *args)
       item = args.join(" ")
@@ -620,7 +620,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   printtimer("basicxman")
-    # @note ops: hop
+    # @level hop
     # @return [void]
     def printtimer(user)
       unless @timers.has_key? user || @timers[user].length == 0
@@ -637,7 +637,7 @@ module Minecraft
     #
     # @example
     #   printtimer()
-    # @note ops: op
+    # @level op
     # @return [void]
     def printtime()
       @server.puts "say Timer is at #{@counter}."
@@ -652,7 +652,7 @@ module Minecraft
     # @example
     #   s("basicxman", "cobble", "give", "cobblestone", "64")
     #   s("basicxman", "mike", "tp", "mike_n_7")
-    # @note ops: hop
+    # @level hop
     # @return [void]
     def s(user, *args)
       shortcut_name = args.slice! 0
@@ -675,7 +675,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   shortcuts("basicxman")
-    # @note ops: hop
+    # @level hop
     # @return [void]
     def shortcuts(user)
       labels = @usershortcuts[user].keys.join(", ") if @usershortcuts.has_key? user
@@ -687,7 +687,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   help("basicxman")
-    # @note ops: none
+    # @level none
     # @return [void]
     def help(user, command = nil)
       unless command.nil?
@@ -714,7 +714,7 @@ module Minecraft
     #
     # @example
     #   kitlist()
-    # @note ops: none
+    # @level none
     # @return [void]
     def kitlist()
       say("Kits: #{KITS.keys.join(", ")}")
@@ -727,7 +727,7 @@ module Minecraft
     # @example
     #   todo("basicxman", "foo")
     #   todo("basicxman")
-    # @note ops: none
+    # @level none
     # @return [void]
     def todo(user, *args)
       if args.length == 0
@@ -749,7 +749,7 @@ module Minecraft
     # @example
     #   finished("basicxman", "foo")
     #   finished("basicxman", "2")
-    # @note ops: none
+    # @level none
     # @return [void]
     def finished(user, *args)
       item = args.join(" ")
@@ -770,7 +770,7 @@ module Minecraft
     # @example
     #   last("basicxman")
     #   last("basicxman", "2")
-    # @note ops: none
+    # @level none
     # @return [void]
     def last(user, history = 1)
       user, history = user.downcase, history.to_i
@@ -792,7 +792,7 @@ module Minecraft
     # @param [String] user The requesting user.
     # @example
     #   history("basicxman")
-    # @note ops: none
+    # @level none
     # @return [void]
     def history(user)
       user = user.downcase
