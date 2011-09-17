@@ -227,18 +227,16 @@ module Minecraft
     def points(user, target_user, num_points = 1)
       target_user = target_user.downcase
       num_points  = num_points.to_i
+      @userpoints[target_user] ||= 0
 
       if user.downcase == target_user
         say("Did you just try to give yourself points? Sure, minus twenty.")
-        @userpoints[target_user] ||= 0
         @userpoints[target_user] -= 20
       elsif num_points < 0
         @server.puts "say Subtracting points? For shame."
-        @userpoints[user] ||= 0
         @userpoints[user] -= num_points
       else
         num_points = [num_points, cap_points(user)].min
-        @userpoints[target_user] ||= 0
         @userpoints[target_user] += num_points
 
         say("#{user} has given #{target_user} #{num_points} points for a total of #{@userpoints[target_user]}.")
