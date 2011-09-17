@@ -181,8 +181,8 @@ module Minecraft
       end
 
       is_all     = !@commands[root][:all].nil? if is_all
-      rest_param = @commands[root][:params].count { |a| a.first  == :rest }
-      reg_params = @commands[root][:params].count { |a| a.last ! = :user }
+      rest_param = @commands[root][:params].count { |a| a.first == :rest }
+      reg_params = @commands[root][:params].count { |a| a.last  != :user }
 
       # Remove excess parameters.
       args = args[0...reg_params] if args.length > reg_params and rest_param == 0
