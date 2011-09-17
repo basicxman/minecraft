@@ -1005,12 +1005,13 @@ module Minecraft
     #   resolve_key("cobblestone")
     #   resolve_key("torches")
     def resolve_key(key)
-      bucket = key[0]
+      bucket        = key[0]
+      shortest_diff = nil
+      shortest_key  = nil
+
       return no_key(key) unless ITEM_BUCKETS.include? bucket
       return key if ITEM_BUCKETS[bucket].include? key
 
-      shortest_diff = nil
-      shortest_key  = nil
       ITEM_BUCKETS[bucket].each do |test_key|
         if test_key.length > key.length
           diff = test_key.length - key.length if test_key.index(key)
