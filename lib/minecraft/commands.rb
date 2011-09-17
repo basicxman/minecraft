@@ -629,7 +629,7 @@ module Minecraft
       shortcut_name = args.slice! 0
 
       if args.length == 0
-        unless @usershortcuts.has_key? user and @usershortcuts[user].has_key? shortcut_name
+        if !@usershortcuts.has_key?(user) || !@usershortcuts[user].has_key?(shortcut_name)
           return kit(user, shortcut_name) if KITS.include? shortcut_name.to_sym
           return say("#{shortcut_name} is not a valid shortcut for #{user}.")
         end
