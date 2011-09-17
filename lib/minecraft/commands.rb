@@ -232,18 +232,17 @@ module Minecraft
         say("Did you just try to give yourself points? Sure, minus twenty.")
         @userpoints[target_user] ||= 0
         @userpoints[target_user] -= 20
-        return
       elsif num_points < 0
         @server.puts "say Subtracting points? For shame."
         @userpoints[user] ||= 0
         @userpoints[user] -= num_points
-        return
-      end
-      num_points = [num_points, cap_points(user)].min
-      @userpoints[target_user] ||= 0
-      @userpoints[target_user] += num_points
+      else
+        num_points = [num_points, cap_points(user)].min
+        @userpoints[target_user] ||= 0
+        @userpoints[target_user] += num_points
 
-      say("#{user} has given #{target_user} #{num_points} points for a total of #{@userpoints[target_user]}.")
+        say("#{user} has given #{target_user} #{num_points} points for a total of #{@userpoints[target_user]}.")
+      end
     end
 
     # Checks a users points or displays the leaderboard.
