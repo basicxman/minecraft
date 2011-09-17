@@ -181,7 +181,7 @@ module Minecraft
     #   dnd("basicxman")
     # @note ops: none
     def dnd(user)
-      user.downcase!
+      user = user.downcase
 
       if @userdnd.include? user
         say("#{user} is ready to be disturbed. *cough*")
