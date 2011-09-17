@@ -18,7 +18,7 @@ module Minecraft
     # Parses the miencraft.net download page for the current jarfile URL.
     def self.get_minecraft_page
       page = Net::HTTP.get("www.minecraft.net", "/download.jsp")
-      data = page.match /\"([0-9a-zA-Z_\/]*minecraft_server\.jar\?v=[0-9]+)/
+      data = page.match(/\"([0-9a-zA-Z_\/]*minecraft_server\.jar\?v=[0-9]+)/)
       data[1]
     end
 
