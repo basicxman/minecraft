@@ -363,7 +363,7 @@ module Minecraft
       end
     end
 
-    # Kicks a random person, the requesting user has a higher cance of being
+    # Kicks a random person, the requesting user has a higher chance of being
     # picked.
     #
     # @param [String] user The requesting user.
@@ -625,7 +625,7 @@ module Minecraft
       end
     end
 
-    # Prints the requesting users current timers.
+    # Prints the requesting user's current timers.
     #
     # @param [String] user The requesting user.
     # @example
