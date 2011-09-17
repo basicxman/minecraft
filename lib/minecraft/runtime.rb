@@ -25,6 +25,8 @@ module Minecraft
 
     # Checks if Minecraft needs to be updated, checks if mobs are to be
     # toggled.
+    #
+    # @return [void]
     def pre_checks
       Minecraft::Tools.download_minecraft if @opts[:update]
       puts "[+] Temporarily toggling mobs.  Setting to #{Minecraft::Tools.toggle_mobs}." if @opts[:tempmobs]

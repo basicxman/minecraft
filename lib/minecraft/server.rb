@@ -5,6 +5,7 @@ module Minecraft
   # Minecraft server jarfile.  The interrupt signal will be trapped to run an
   # exit hook and threads will be created to process all pipes.
   class Server
+    # @return [IO]
     attr_accessor :sin
 
     # New Server instance.
@@ -31,9 +32,11 @@ module Minecraft
       @thr.value
       exit!
     end
-    
+
     # An exit hook, checks if mobs need to be untoggled and saves the server.
     # Server is stopped gracefully.
+    #
+    # @return [void]
     def minecraft_exit
       puts "[+] Restoring previous mob state to #{Minecraft::Tools.toggle_mobs}." if @opts[:tempmobs]
       puts "[~] The current welcome message is:"
