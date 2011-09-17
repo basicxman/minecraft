@@ -288,18 +288,17 @@ module Minecraft
     def kickvote(user, target_user = nil)
       return @server.puts "say No user #{target_user} exists." unless @users.include? target_user
       return vote(user) if target_user.nil?
+      return if submit_vote(user, target_user)
 
-      unless submit_vote(user, target_user)
-        @userkickvotes[target_user] = {
-          :tally => kick_influence(user),
-          :votes => [user],
-          :start => Time.now
-        }
-        @last_kick_vote = target_user
+      @userkickvotes[target_user] = {
+        :tally => kick_influence(user),
+        :votes => [user],
+        :start => Time.now
+      }
+      @last_kick_vote = target_user
 
-        say("A kickvote has been initiated for #{target_user}.")
-        say("To vote enter !kickvote #{target_user}.")
-      end
+      say("A kickvote has been initiated for #{target_user}.")
+      say("To vote enter !kickvote #{target_user}.")
     end
 
     # Votes for the last initiated kickvote.
