@@ -481,7 +481,7 @@ module Minecraft
       if key.nil?
         say(@server_properties.keys.join(", "))
       else
-        say ("#{key} is currently #{@server_properties[key]}") if @server_properties.include? key
+        say("#{key} is currently #{@server_properties[key]}") if @server_properties.include? key
       end
     end
 
@@ -757,7 +757,7 @@ module Minecraft
 
       # process_history_addition() will not add the same command twice in a
       # row, so only slice if the command history length has changed.
-      @command_history[user].slice! -1 unless @command_history[user].length == t
+      @command_history[user].slice!(-1) unless @command_history[user].length == t
     end
 
     # Prints the last three commands executed.
