@@ -796,7 +796,8 @@ module Minecraft
       return if params.length == 0
       params.slice! 0 if params[0][1] == :user
 
-      if params.length == 1
+      case params.length
+      when 1
         name = params[0][1].to_s.gsub("_", " ")
         type = params[0][0]
 
@@ -809,7 +810,7 @@ module Minecraft
         when :req
           say("!#{command} '#{name}'")
         end
-      elsif params.length == 2
+      when 2
         first_name  = params[0][1].to_s.gsub("_", " ")
         second_name = params[1][1].to_s.gsub("_", " ")
         type        = params[1][0]
