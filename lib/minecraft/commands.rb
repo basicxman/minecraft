@@ -165,7 +165,6 @@ module Minecraft
     #   disco("basicxman")
     # @note ops: op
     def disco(user)
-      @disco ||= false
       if @disco
         @server.puts "say Disco ends."
         @disco = false
