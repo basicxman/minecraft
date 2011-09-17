@@ -48,6 +48,7 @@ module Minecraft
       else
         @time_change = [1000, time_change].min
       end
+
       @server.puts "say New rate: #{@time_change} every ten seconds."
     end
 
@@ -61,12 +62,14 @@ module Minecraft
     # @note ops: none
     def memo(user, target_user, *args)
       target_user = target_user.downcase
+
       if @memos.has_key? target_user and @memos[target_user].length == 5
         return @server.puts "say #{target_user} has too many memos already!"
       end
 
       @memos[target_user] ||= []
       @memos[target_user] << [user, args.join(" ")]
+
       say "Memo for #{target_user} added. Will be printed next time s/he logs in."
     end
 
@@ -97,6 +100,7 @@ module Minecraft
         @welcome_message = args.join(" ")
         @server.puts "say Changed welcome message."
       end
+
       display_welcome_message("basicxman")
     end
 
@@ -179,6 +183,7 @@ module Minecraft
     # @note ops: none
     def dnd(user)
       user.downcase!
+
       if @userdnd.include? user
         say("#{user} is ready to be disturbed. *cough*")
         @userdnd.reject! { |u| u == user }
@@ -222,7 +227,8 @@ module Minecraft
     # @note ops: none
     def points(user, target_user, num_points = 1)
       target_user = target_user.downcase
-      num_points = num_points.to_i
+      num_points  = num_points.to_i
+
       if user.downcase == target_user
         say("Did you just try to give yourself points? Sure, minus twenty.")
         @userpoints[target_user] ||= 0
@@ -237,6 +243,7 @@ module Minecraft
       num_points = [num_points, cap_points(user)].min
       @userpoints[target_user] ||= 0
       @userpoints[target_user] += num_points
+
       say("#{user} has given #{target_user} #{num_points} points for a total of #{@userpoints[target_user]}.")
     end
 
@@ -256,6 +263,7 @@ module Minecraft
           leaderboard[p] << u
         end
         num_to_display = 5
+
         leaderboard.keys.sort.reverse.each do |points|
           leaderboard[points].each do |u|
             return unless num_to_display >= 1
@@ -284,6 +292,7 @@ module Minecraft
     def kickvote(user, target_user = nil)
       return @server.puts "say No user #{target_user} exists." unless @users.include? target_user
       return vote(user) if target_user.nil?
+
       unless submit_vote(user, target_user)
         @userkickvotes[target_user] = {
           :tally => kick_influence(user),
@@ -291,6 +300,7 @@ module Minecraft
           :start => Time.now
         }
         @last_kick_vote = target_user
+
         say("A kickvote has been initiated for #{target_user}.")
         say("To vote enter !kickvote #{target_user}.")
       end
@@ -344,8 +354,9 @@ module Minecraft
     #   roulette("basicxman")
     # @note ops: op
     def roulette(user)
-      users = @users + [user] * 3
+      users       = @users + [user] * 3
       picked_user = users.sample
+
       say("#{user} has requested a roulette kick, s/he has a higher chance of being kicked.")
       @server.puts "kick #{picked_user}"
     end
@@ -500,9 +511,11 @@ module Minecraft
       end
 
       time_spent = calculate_uptime(target_user)
+
       if @userlog.has_key? target_user
         total = "  Out of a total of #{format_uptime(@userlog[target_user] + time_spent)} minutes."
       end
+
       say("#{target_user} has been online for #{format_uptime(time_spent)} minutes.#{total}")
     end
 
@@ -551,10 +564,13 @@ module Minecraft
     # @note ops: hop
     def addtimer(user, *args)
       item, duration = items_arg(30, args)
-      item = resolve_item(item)
+      item           = resolve_item(item)
+
       return @server.puts "say Timer was not added." if item.nil?
-      @timers[user] ||= {}
+
+      @timers[user]     ||= {}
       @timers[user][item] = duration
+
       say("Timer added for #{user}.  Giving item id #{item} every #{duration} seconds.")
     end
 
@@ -568,6 +584,7 @@ module Minecraft
     def deltimer(user, *args)
       item = args.join(" ")
       item = resolve_item(item)
+
       if @timers.has_key? user
         @timers[user].delete item
         @server.puts "say #{item} timer is deleted."
@@ -587,6 +604,7 @@ module Minecraft
         @server.puts "say No timers have been added for #{user}."
         return
       end
+
       @timers[user].each do |item, frequency|
         @server.puts "say #{item} every #{frequency} seconds."
       end
@@ -614,6 +632,7 @@ module Minecraft
     # @note ops: hop
     def s(user, *args)
       shortcut_name = args.slice! 0
+
       if args.length == 0
         unless @usershortcuts.has_key? user and @usershortcuts[user].has_key? shortcut_name
           return kit(user, shortcut_name) if KITS.include? shortcut_name.to_sym
@@ -622,9 +641,10 @@ module Minecraft
         return call_command(user, @usershortcuts[user][shortcut_name].first, *@usershortcuts[user][shortcut_name][1..-1]) if args.length == 0
       end
 
-      command_string = args
-      @usershortcuts[user] ||= {}
+      command_string                      = args
+      @usershortcuts[user]              ||= {}
       @usershortcuts[user][shortcut_name] = command_string
+
       say("Shortcut labelled #{shortcut_name} for #{user} has been added.")
     end
 
@@ -648,6 +668,7 @@ module Minecraft
     def help(user, command = nil)
       unless command.nil?
         return @server.puts "say #{command} does not exist." unless @commands.has_key? command.to_sym
+
         command_signature(command.to_sym)
         say(@commands[command.to_sym][:help])
         return
@@ -663,6 +684,7 @@ module Minecraft
           priv == :none ? arr << key : arr
         end
       }.sort.map { |s| "!" + s.to_s }
+
       say(commands.join(", "))
     end
 
@@ -693,6 +715,7 @@ module Minecraft
 
       item = args.join(" ")
       @todo_items << item
+
       @server.puts "say Added item."
     end
 
@@ -706,12 +729,15 @@ module Minecraft
     # @note ops: none
     def finished(user, *args)
       item = args.join(" ")
+
       if item.to_i.to_s == item
         index = item.to_i - 1
       else
         index = @todo_items.find_index(item)
       end
+
       return @server.puts "say Item does not exist." if index.nil? or @todo_items[index].nil?
+
       @todo_items.slice! index
       @server.puts "say Hurray!"
     end
@@ -731,7 +757,7 @@ module Minecraft
       end
 
       command = @command_history[user][-history]
-      t = @command_history[user].length
+      t       = @command_history[user].length
       call_command(user, command.first, *command[1..-1])
 
       # process_history_addition() will not add the same command twice in a
@@ -772,12 +798,13 @@ module Minecraft
     #   command_signature(:give)
     def command_signature(command)
       params = method(command).parameters || []
-
       return if params.length == 0
       params.slice! 0 if params[0][1] == :user
+
       if params.length == 1
         name = params[0][1].to_s.gsub("_", " ")
         type = params[0][0]
+
         case type
         when :opt
           say("!#{command}")
@@ -788,9 +815,10 @@ module Minecraft
           say("!#{command} '#{name}'")
         end
       elsif params.length == 2
-        first_name = params[0][1].to_s.gsub("_", " ")
+        first_name  = params[0][1].to_s.gsub("_", " ")
         second_name = params[1][1].to_s.gsub("_", " ")
-        type = params[1][0]
+        type        = params[1][0]
+
         case type
         when :rest
           say("!#{command} '#{first_name}', 'arguments', '...'")
@@ -825,6 +853,7 @@ module Minecraft
     #   change_time("morning")
     def change_time(time)
       return false unless TIME.include? time
+
       @server.puts "time set #{TIME[time]}"
       @server.puts "say #{TIME_QUOTES[time]}" unless TIME_QUOTES[time] == ""
       return true
@@ -840,6 +869,7 @@ module Minecraft
       if @userkickvotes[user][:tally] >= @vote_threshold
         @server.puts "say Enough votes have been given to kick #{user}."
         @server.puts "kick #{user}"
+
         @userkickvotes.delete(user)
       end
     end
@@ -881,6 +911,7 @@ module Minecraft
         else
           @userkickvotes[target_user][:votes] << user
           @userkickvotes[target_user][:tally] += kick_influence(user)
+
           check_kickvote(target_user)
         end
         return true
@@ -917,9 +948,10 @@ module Minecraft
         return
       end
 
-      quantity = 2560 if quantity > 2560
+      quantity      = 2560 if quantity > 2560
       full_quantity = (quantity / 64.0).floor
       sub_quantity  = quantity % 64
+
       @server.puts "give #{user} #{item} 64\n" * full_quantity
       @server.puts "give #{user} #{item} #{sub_quantity}" if sub_quantity > 0
     end
@@ -944,7 +976,7 @@ module Minecraft
           first  = args[0..-2].join(" ")
         else
           second = default
-          first = args[0..-1].join(" ")
+          first  = args[0..-1].join(" ")
         end
       end
       return [first, second]
@@ -1031,15 +1063,15 @@ module Minecraft
     def quantify(value)
       quantity = value.scan(/[0-9]+[a-z]?/).inject(0) do |total, term|
         quantity, flag = term.match(/([0-9]+)([a-z]?)/)[1..2]
-        quantity = quantity.to_i
+        quantity       = quantity.to_i
         return total + quantity if flag.nil?
 
         total + case flag
-        when 'm' then quantity * 64
-        when 'd' then (64.0 / [1, quantity].max).round
-        when 's' then [1, 64 - quantity].max
-        else quantity
-        end
+                when 'm' then quantity * 64
+                when 'd' then (64.0 / [1, quantity].max).round
+                when 's' then [1, 64 - quantity].max
+                else quantity
+                end
       end
       return [2560, quantity].min
     end
