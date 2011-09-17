@@ -585,7 +585,7 @@ module Minecraft
     #   printtimer("basicxman")
     # @note ops: hop
     def printtimer(user)
-      unless @timers.has_key? user || @timers[user].length == 0
+      if not @timers.has_key? user || @timers[user].length == 0
         @server.puts "say No timers have been added for #{user}."
         return
       end
