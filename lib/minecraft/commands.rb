@@ -669,16 +669,19 @@ module Minecraft
         return
       end
 
-      commands = @commands.keys.inject([]) { |arr, key|
-        priv = @commands[key][:ops]
+      arr = []
+      @commands.each do |key, value|
+        priv = value[:ops]
+
         if is_op? user
           arr << key
         elsif is_hop? user
-          priv == :op ? arr : arr << key
+          arr << key unless priv == :op
         else
-          priv == :none ? arr << key : arr
+          arr << key if priv == :none
         end
-      }.sort.map { |s| "!" + s.to_s }
+      end
+      commands = arr.sort.map { |s| "!" + s.to_s }
 
       say(commands.join(", "))
     end
