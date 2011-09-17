@@ -284,8 +284,8 @@ module Minecraft
     #   kickvote("basicxman")
     # @note ops: none
     def kickvote(user, target_user = nil)
-      return @server.puts "say No user #{target_user} exists." unless @users.include? target_user
       return vote(user) if target_user.nil?
+      return @server.puts "say No user #{target_user} exists." unless @users.include? target_user
       unless submit_vote(user, target_user)
         @userkickvotes[target_user] = {
           :tally => kick_influence(user),
