@@ -12,6 +12,7 @@ module Minecraft
     # @param [Slop] opts Command line options from Slop.
     def initialize(server, opts)
       @ops = File.readlines("ops.txt").map { |s| s.chomp } if File.exists? "ops.txt"
+
       get_json :hops, []
       get_json :useruptime
       get_json :timers
@@ -22,12 +23,13 @@ module Minecraft
       get_json :memos
       get_json :todo_items, []
       get_json :command_history
-      @users = []
-      @counter = 0
-      @logon_time = {}
-      @server = server
-      @userkickvotes = {}
+      @users          = []
+      @counter        = 0
+      @logon_time     = {}
+      @server         = server
+      @userkickvotes  = {}
       @last_kick_vote = nil
+
       load_server_properties
 
       @ic = Iconv.new("UTF-8//IGNORE", "UTF-8")
@@ -38,10 +40,10 @@ module Minecraft
       @rules           ||= "No rules specified."
 
       # Initialize the set of commands.
-      @commands = {}
-      commands = Minecraft::Commands.public_instance_methods
+      @commands     = {}
+      commands      = Minecraft::Commands.public_instance_methods
       @command_info = File.read(method(commands.first).source_location.first).split(/$/)
-      @enums = [ :ops ]
+      @enums        = [ :ops ]
       commands.each do |sym|
         next if sym.to_s.end_with? "all"
         meth = method(sym)
@@ -136,7 +138,7 @@ module Minecraft
       return if blacklist.include? command.to_s
 
       history = [command] + args
-      u = user.downcase
+      u       = user.downcase
 
       @command_history[u] ||= []
       return if @command_history[u].last == history
@@ -161,24 +163,26 @@ module Minecraft
     #   call_command("basicxman", "give", "cobblestone", "64")
     def call_command(user, command, *args)
       process_history_addition(user, command, args)
+
       is_all = command.to_s.end_with? "all"
       root   = command.to_s.chomp("all").to_sym
+
       return send(root, user, *args) unless @commands.include? root
 
       # Any `all` suffixed command requires ops.
       if @commands[root][:ops] == :op or (is_all and @commands[root][:all])
         return unless validate_ops(user, command)
       elsif @commands[root][:ops] == :hop
-        return unless validate_ops(user, command, false) or validate_hops(user, command)
+        return if not validate_ops(user, command, false) and not validate_hops(user, command)
       end
 
       if respond_to? "validate_" + root.to_s
         return unless send("validate_" + root.to_s, *args)
       end
 
-      is_all = !@commands[root][:all].nil? if is_all
+      is_all     = !@commands[root][:all].nil? if is_all
       rest_param = @commands[root][:params].count { |a| a.first == :rest }
-      reg_params = @commands[root][:params].count { |a| a.last != :user }
+      reg_params = @commands[root][:params].count { |a| a.last  != :user }
 
       # Remove excess parameters.
       args = args[0...reg_params] if args.length > reg_params and rest_param == 0
@@ -271,6 +275,7 @@ module Minecraft
     # executed.
     def periodic
       @counter += 1
+
       check_save
       if @disco
         if @counter % 2 == 0
@@ -316,13 +321,13 @@ module Minecraft
     #
     # @param [String] line The line from the console.
     def info_command(line)
-      line.gsub! /^.*?\[INFO\]\s+/, ''
+      line.gsub!(/^.*?\[INFO\]\s+/, '')
       return if meta_check(line)
 
       # :foo should use the shortcut 'foo'.
       line.gsub!(/^(\<.*?\>\s+),/) { |m| "#{$1}!s " }
 
-      match_data = line.match /^\<(.*?)\>\s+!(.*?)$/
+      match_data = line.match(/^\<(.*?)\>\s+!(.*?)$/)
       return if match_data.nil?
 
       user = match_data[1]
@@ -370,7 +375,7 @@ module Minecraft
     def check_ops(line)
       user = line.split(" ").last
       if line.index "De-opping"
-        @ops.reject! { |u| u == user.downcase }
+        @ops.delete user.downcase
         return true
       elsif line.index "Opping"
         @ops << user.downcase
@@ -381,6 +386,7 @@ module Minecraft
     # Check if a console line has informed us about a player [dis]connecting.
     def check_join_part(line)
       user = line.split(" ").first
+
       if line.index "lost connection"
         log_time(user)
         return remove_user(user)
@@ -397,7 +403,8 @@ module Minecraft
     # here and attempt to !give the player the item.  Otherwise print an error.
     def method_missing(sym, *args)
       item, quantity = items_arg(1, [sym.to_s.downcase, args.last])
-      item = resolve_item(item)
+      item           = resolve_item(item)
+
       if item and is_op? args.first
         give(args.first, item, quantity.to_s)
       else
@@ -411,6 +418,7 @@ module Minecraft
       time_spent = calculate_uptime(user)
       @userlog[user] ||= 0
       @userlog[user] += time_spent
+
       say("#{user} spent #{format_uptime(time_spent)} minutes in the server, totalling to #{format_uptime(@userlog[user])}.")
       save_file :userlog
     end
@@ -439,6 +447,7 @@ module Minecraft
     #   say("The quick brown fox jumped over the lazy dog.")
     def say(message)
       temp_length, buf = 0, []
+
       message.split(" ").each do |word|
         temp_length += word.length
         if temp_length > 45
@@ -449,6 +458,7 @@ module Minecraft
           buf << word
         end
       end
+
       @server.puts "say #{buf.join(" ")}" unless buf.empty?
     end
 
@@ -496,6 +506,7 @@ module Minecraft
     # Load the server.properties file into a Ruby hash.
     def load_server_properties
       @server_properties = {}
+
       File.readlines("server.properties").each do |line|
         next if line[0] == "#"
         key, value = line.split("=")
