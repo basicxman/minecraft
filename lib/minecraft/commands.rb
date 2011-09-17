@@ -260,8 +260,8 @@ module Minecraft
         end
         num_to_display = 5
 
-        leaderboard.keys.sort.reverse.each do |points|
-          leaderboard[points].each do |u|
+        leaderboard.sort {|one, other| other <=> one}.each do |points, users|
+          users.each do |u|
             return unless num_to_display >= 1
             @server.puts "say #{u}: #{points}"
             num_to_display -= 1
