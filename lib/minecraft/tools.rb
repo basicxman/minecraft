@@ -3,7 +3,8 @@ require "net/http"
 module Minecraft
   # Methods for external manipulation of the current deployment.
   module Tools
-    # Checks if minecraft_server.jar and calls the download method if not.
+    # Checks if minecraft_server.jar exists and calls the download
+    # method if not.
     def self.check_jarfile
       download_minecraft unless File.exists? "minecraft_server.jar"
     end
