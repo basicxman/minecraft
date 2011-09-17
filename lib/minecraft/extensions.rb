@@ -3,6 +3,7 @@ module Minecraft
   # manage custom functionality additional to default Notchian Minecraft
   # behaviour.
   class Extensions
+    # @return [String]
     attr_accessor :welcome_message
     include Commands
 
@@ -66,6 +67,7 @@ module Minecraft
     # @param [Symbol] sym Method symbol.
     # @example
     #   parse_comments(6, 13, :disco)
+    # @return [void]
     def parse_comments(src_b, src_e, sym)
       help_done = false
       (src_b..src_e).each do |n|
@@ -87,6 +89,9 @@ module Minecraft
 
     # Gets the line number bounds for the comments corresponding with a method
     # on a given line number.
+    #
+    # @param [Number] line_number
+    # @return [Array<Number, Number>] The bounds
     def get_comment_range(line_number)
       src_e = line_number - 2
       src_b = (0..src_e - 1).to_a.reverse.detect(src_e - 1) { |n| not @command_info[n] =~ /^\s+#/ } + 1
@@ -94,6 +99,7 @@ module Minecraft
     end
 
     # Sets an instance variable with it's corresponding data file or a blank hash.
+    # @return [void]
     def get_json(var, blank = {})
       file = "#{var}.json"
       t = if File.exists? file
@@ -105,6 +111,7 @@ module Minecraft
     end
 
     # Save instance variables to their respective JSON files.
+    # @return [void]
     def save
       save_file :timers
       save_file :usershortcuts
@@ -121,6 +128,7 @@ module Minecraft
     # @param [Symbol] var
     # @example
     #   save_file :timers
+    # @return [void]
     def save_file(var)
       File.open("#{var}.json", "w") { |f| f.print instance_variable_get("@#{var}").to_json }
     end
@@ -133,6 +141,7 @@ module Minecraft
     # @example
     #   process_history_addition("basicxman", "give", "cobblestone")
     #   process_history_addition("basicxman", "history")
+    # @return [void]
     def process_history_addition(user, command, args)
       blacklist = %w( last history s )
       return if blacklist.include? command.to_s
@@ -161,6 +170,7 @@ module Minecraft
     # @param args Arguments for the command.
     # @example
     #   call_command("basicxman", "give", "cobblestone", "64")
+    # @return [void]
     def call_command(user, command, *args)
       process_history_addition(user, command, args)
 
@@ -212,6 +222,7 @@ module Minecraft
     # @param args Arguments for the command.
     # @example
     #   call_command("basicxman", "give")
+    # @return [void]
     def validate_command_entry(rest_param, reg_params, user, command, *args)
       args.slice! 0 if args.first == user
       params = @commands[command.to_sym][:params][1..-1].map { |a| [a[0], a[1].to_s.gsub("_", " ")] }
@@ -231,6 +242,9 @@ module Minecraft
     end
 
     # Processes a line from the console.
+    #
+    # @param [String] line
+    # @return [void]
     def process(line)
       line = @ic.iconv(line) if line.index "7"
       puts colour(line.dup)
@@ -241,6 +255,9 @@ module Minecraft
     end
 
     # Colours a server side line
+    #
+    # @param [String] line
+    # @return [String] The coloured string
     def colour(line)
       return line if @no_colour
       line.gsub!(/^([0-9\-]{10}\s[0-9:]{8})/) { |m| "\033[0;37m#{$1}\033[0m" }
@@ -257,6 +274,8 @@ module Minecraft
 
     # Checks if the server needs to be saved and prints the save-all command if
     # so.
+    #
+    # @return [void]
     def check_save
       if @savefreq.nil?
         freq = 30
@@ -273,6 +292,8 @@ module Minecraft
 
     # Increments the counter and checks if any timers are needed to be
     # executed.
+    #
+    # @return [void]
     def periodic
       @counter += 1
 
@@ -307,6 +328,7 @@ module Minecraft
     # @param [String] user The user to check.
     # @example
     #   check_memos("mike_n_7")
+    # @return [void]
     def check_memos(user)
       user = user.downcase
       return unless @memos.has_key? user
@@ -320,6 +342,7 @@ module Minecraft
     # and then calls the call_command method.
     #
     # @param [String] line The line from the console.
+    # @return [void]
     def info_command(line)
       line.gsub!(/^.*?\[INFO\]\s+/, '')
       return if meta_check(line)
@@ -346,6 +369,7 @@ module Minecraft
     # if any of them were used (and thus no further processing required).
     #
     # @param [String] line The passed line from the console.
+    # @return [Boolean]
     def meta_check(line)
       return true if check_kick_ban(line)
       return true if check_ops(line)
@@ -362,6 +386,9 @@ module Minecraft
     end
 
     # Check if a console line has informed us about a ban or kick.
+    #
+    # @param [String] line
+    # @return [void]
     def check_kick_ban(line)
       user = line.split(" ").last
       if line.index "Banning"
@@ -372,6 +399,9 @@ module Minecraft
     end
 
     # Check if a console line has informed us about a [de-]op privilege change.
+    #
+    # @param [String] line
+    # @return [Boolean]
     def check_ops(line)
       user = line.split(" ").last
       if line.index "De-opping"
@@ -384,6 +414,9 @@ module Minecraft
     end
 
     # Check if a console line has informed us about a player [dis]connecting.
+    #
+    # @param [String] line
+    # @return [Boolean]
     def check_join_part(line)
       user = line.split(" ").first
 
@@ -414,6 +447,9 @@ module Minecraft
 
     # Calculate and print the time spent by a recently disconnected user.  Save
     # the user uptime log.
+    #
+    # @param [String] user
+    # @return [void]
     def log_time(user)
       time_spent = calculate_uptime(user)
       @userlog[user] ||= 0
@@ -445,6 +481,7 @@ module Minecraft
     # @param [String] message The message to print properly.
     # @example
     #   say("The quick brown fox jumped over the lazy dog.")
+    # @return [void]
     def say(message)
       temp_length, buf = 0, []
 
@@ -499,11 +536,16 @@ module Minecraft
     end
 
     # An error message for invalid commands.
+    #
+    # @param [String] command
+    # @return [void]
     def invalid_command(command)
       @server.puts "say #{command} is invalid."
     end
 
     # Load the server.properties file into a Ruby hash.
+    #
+    # @return [void]
     def load_server_properties
       @server_properties = {}
 
@@ -515,6 +557,9 @@ module Minecraft
     end
 
     # Display a welcome message to a recently connected user.
+    #
+    # @param [String] user
+    # @return [void]
     def display_welcome_message(user)
       say("#{@welcome_message.gsub('%', user)}") unless @welcome_message.nil?
     end
