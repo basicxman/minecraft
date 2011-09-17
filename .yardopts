@@ -1,5 +1,6 @@
 --hide-void-return
 --title "Minecraft server wrapper and deployment solution."
 --readme README.md
+--tag "level:Required level"
 
 lib/**/*.rb
