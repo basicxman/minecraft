@@ -173,7 +173,7 @@ module Minecraft
       if @commands[root][:ops] == :op or (is_all and @commands[root][:all])
         return unless validate_ops(user, command)
       elsif @commands[root][:ops] == :hop
-        return unless validate_ops(user, command, false) or validate_hops(user, command)
+        return if not validate_ops(user, command, false) and not validate_hops(user, command)
       end
 
       if respond_to? "validate_" + root.to_s
