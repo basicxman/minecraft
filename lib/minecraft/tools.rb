@@ -16,16 +16,16 @@ module Minecraft
     # @return [void]
     def self.download_minecraft
       url = get_minecraft_page
-      puts "[+] Downloading Minecraft server..."
-      `wget http://minecraft.net/#{url} -O minecraft_server.jar -q`
+      puts "[+] Downloading Minecraft server from #{url}"
+      `wget #{url} -O minecraft_server.jar -q`
     end
 
     # Parses the miencraft.net download page for the current jarfile URL.
     #
     # @return [String] URL to the current Minecraft jar
     def self.get_minecraft_page
-      page = Net::HTTP.get("www.minecraft.net", "/download.jsp")
-      data = page.match(/\"([0-9a-zA-Z_\/]*minecraft_server\.jar\?v=[0-9]+)/)
+      page = Net::HTTP.get("www.minecraft.net", "/download")
+      data = page.match(/href=\"([^>]*?minecraft_server\.jar\?.*?)"/)
       data[1]
     end
 

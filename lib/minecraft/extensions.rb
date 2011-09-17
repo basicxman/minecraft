@@ -549,6 +549,7 @@ module Minecraft
     def load_server_properties
       @server_properties = {}
 
+      return unless File.exists? "server.properties"
       File.readlines("server.properties").each do |line|
         next if line[0] == "#"
         key, value = line.split("=")

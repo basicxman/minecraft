@@ -13,7 +13,6 @@ module Minecraft
     # @return [void]
     # @note ops: op
     def creative(user, target_user = user)
-      puts target_user
       @server.puts "gamemode #{target_user} 1"
     end
 
