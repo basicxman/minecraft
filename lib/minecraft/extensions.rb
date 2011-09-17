@@ -375,7 +375,7 @@ module Minecraft
     def check_ops(line)
       user = line.split(" ").last
       if line.index "De-opping"
-        @ops.reject! { |u| u == user.downcase }
+        @ops.delete user.downcase
         return true
       elsif line.index "Opping"
         @ops << user.downcase

@@ -185,7 +185,7 @@ module Minecraft
 
       if @userdnd.include? user
         say("#{user} is ready to be disturbed. *cough*")
-        @userdnd.reject! { |u| u == user }
+        @userdnd.delete user
       else
         say("#{user} does not wish to be disturbed.")
         @userdnd << user
@@ -201,7 +201,7 @@ module Minecraft
     # @note ops: op
     def disturb(user, target_user)
       say("#{target_user} is being disturbed by #{user}!")
-      @userdnd.reject! { |u| u == target_user.downcase }
+      @userdnd.delete target_user.downcase
     end
 
     # Prints the users who do not wish to be disturbed.
